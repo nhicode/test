@@ -7,6 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐱</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="image" href="https://raw.githubusercontent.com/nhicode/test/main/output_transparent_halo.gif">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -20,8 +21,6 @@
     --mint:#6be8c9;
     --text:#f5f1ff;
     --muted:#b8adda;
-    /* Canh vị trí khuôn mặt/đầu trong khung tròn avatar. "center 20%" nghĩa là
-       neo 20% từ trên xuống — tăng % nếu đầu vẫn bị cắt, giảm nếu bị lệch xuống dưới. */
     --avatar-pos: center 20%;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -229,7 +228,6 @@
   }
   .deco-cat.dragging{ cursor:grabbing; }
 
-
   .avatar-wrap{
     position:relative;
     width:112px; height:112px;
@@ -286,15 +284,9 @@
     mix-blend-mode:screen;
   }
 
-  /* "Trang trí ảnh đại diện" — đè thẳng lên TOÀN BỘ avatar (không chỉ viền ring),
-     dùng chung 1 kiểu cho cả avatar 1 và avatar 2. Được phép tràn ra ngoài vòng tròn
-     avatar (halo/cánh/vương miện...) giống cách Discord hiển thị avatar decoration. */
   .avatar-deco{
     position:absolute;
-    /* Halo thường nhô lên PHÍA TRÊN đầu nên chừa khoảng trên (top) rộng hơn dưới (bottom).
-       4 số theo thứ tự top right bottom left — tăng số nào thì phía đó "nở" ra thêm,
-       chỉnh lại nếu ảnh vẫn bị cắt hoặc lệch. */
-    inset:-45% -25% -10% -25%;
+    inset:-22%;
     pointer-events:none;
     z-index:3;
     opacity:0;
@@ -465,7 +457,6 @@
 
 <div class="bg-video-wrap" id="bgVideoWrap"></div>
 
-<!-- ============ BOOT SCREEN ============ -->
 <div id="boot">
   <div class="term-window">
     <div class="term-bar">
@@ -480,7 +471,6 @@
   </div>
 </div>
 
-<!-- ============ PROFILE PAGE ============ -->
 <div id="profile">
   <div class="card" id="card">
     <div class="profile-effect-layer" id="profileEffectLayer"></div>
@@ -534,9 +524,6 @@
 </div>
 
 <script>
-/* ============================================================
-   CẤU HÌNH — chỉnh mọi thông tin cá nhân ở đây
-============================================================ */
 const CONFIG = {
   avatarEmoji: "🐱",
   avatarImageUrl: "https://raw.githubusercontent.com/nhicode/ak/main/att.Wkk_rbqxuLz2maSWtCfWcpA-4q-CESDrREJ9E_SpU7U.png.jpeg",
@@ -564,18 +551,15 @@ const CONFIG = {
     "https://raw.githubusercontent.com/nhicode/ak/main/83d8a1eb09a8d64e59233eec5d4d5c2d.png"
   ],
 
-  // Video nền toàn trang, đặt phía sau card — loop liên tục
   backgroundVideoUrl: "https://raw.githubusercontent.com/nhicode/ak/main/o0fqgQDIDCXehCEOAEfCA1TkyFn72NDIp5yjzV.mp4",
 
-  // 2 video "hiệu ứng hồ sơ" — chỉ phủ toàn khung profile, "nháy" theo chu kỳ (giống Discord)
   profileEffectVideos: [
     "https://raw.githubusercontent.com/nhicode/ak/main/RPReplay_Final1783737032.mov",
     "https://raw.githubusercontent.com/nhicode/ak/main/RPReplay_Final1783736855.mov"
   ],
   effectIntervalMs: 10000,
 
-  // Khung trang trí avatar — GIF động (tự có nền trong suốt sẵn, không cần blend-mode/mask
-  // gì thêm), dùng chung cho avatar 1 và avatar 2.
+  // Khung trang trí avatar — GIF động (đã có nền trong suốt sẵn) dùng chung cho avatar 1 và avatar 2
   avatarDecoImageUrl: "https://raw.githubusercontent.com/nhicode/test/main/output_transparent_halo.gif",
 
   techStack: [
@@ -590,9 +574,6 @@ const CONFIG = {
   systemLabel: "Windows 11"
 };
 
-/* ============================================================
-   BOOT: ASCII từ emoji + hiệu ứng "giải mã"
-============================================================ */
 function buildAsciiFromEmoji(emoji, cols, rows){
   const cw = 12, ch = 24;
   const canvas = document.createElement('canvas');
@@ -668,39 +649,6 @@ function buildAsciiFromImage(imgUrl, cols, rows){
   });
 }
 
-function animateAsciiReveal(targetLines, el, duration){
-  return new Promise(resolve=>{
-    const rows = targetLines.length;
-    const cols = targetLines[0].length;
-    const finishTimes = targetLines.map(()=>
-      Array.from({length:cols}, ()=> Math.random()*duration*0.75)
-    );
-    const glitch = "!<>-_\\/[]{}=+*^?#";
-    const start = performance.now();
-    function frame(now){
-      const t = now - start;
-      let out = '';
-      for(let r=0;r<rows;r++){
-        let line = '';
-        for(let c=0;c<cols;c++){
-          const target = targetLines[r][c];
-          if(target === ' '){ line += ' '; continue; }
-          line += (t >= finishTimes[r][c]) ? target : glitch[(Math.random()*glitch.length)|0];
-        }
-        out += line + '\n';
-      }
-      el.textContent = out;
-      if(t < duration){
-        requestAnimationFrame(frame);
-      } else {
-        el.textContent = targetLines.join('\n');
-        resolve();
-      }
-    }
-    requestAnimationFrame(frame);
-  });
-}
-
 function animateAsciiTypewriter(targetLines, el, totalDuration){
   return new Promise(resolve=>{
     const rows = targetLines.length;
@@ -742,15 +690,6 @@ function addBootLine(container, text, cls){
   });
 }
 
-function detectSystem(){
-  const ua = navigator.userAgent;
-  if(/Windows/.test(ua)) return "Windows";
-  if(/Mac OS X/.test(ua)) return /iPhone|iPad|iPod/.test(ua) ? "iOS" : "macOS";
-  if(/Android/.test(ua)) return "Android";
-  if(/Linux/.test(ua)) return "Linux";
-  return "Unknown";
-}
-
 async function runBoot(){
   const asciiEl = document.getElementById('asciiArt');
   const linesEl = document.getElementById('bootLines');
@@ -763,7 +702,6 @@ async function runBoot(){
   }
 
   await animateAsciiTypewriter(ascii, asciiEl, 500);
-
   await addBootLine(linesEl, "Press Enter / Click To Continue", "prompt");
 
   const proceed = ()=>{
@@ -778,9 +716,6 @@ async function runBoot(){
   document.getElementById('boot').addEventListener('click', proceed);
 }
 
-/* ============================================================
-   PROFILE: render nội dung từ CONFIG
-============================================================ */
 function renderAvatar(){
   const el = document.getElementById('avatarEl');
   if(CONFIG.avatarImageUrl){
@@ -874,20 +809,21 @@ function initEffects(){
   }, 1200);
 }
 
-// Khung trang trí avatar — dùng thẳng file GIF (đã tự có animation + nền trong suốt),
-// chỉ cần chèn thẻ <img> là trình duyệt tự phát, không cần xử lý gì thêm.
 function initAvatarDeco(){
   const src = CONFIG.avatarDecoImageUrl;
   if(!src) return;
   const targets = [document.getElementById('avatarDeco1'), document.getElementById('avatarDeco2')].filter(Boolean);
   targets.forEach(el=>{
-    el.innerHTML = '';
     const img = document.createElement('img');
-    img.src = src;
+    img.loading = 'eager';
+    img.decoding = 'async';
     img.alt = '';
     img.draggable = false;
+    // Chỉ đánh dấu "playing" (hiện ra) SAU KHI ảnh đã tải xong, để không bao giờ
+    // thấy khung viền đứng hình ở khung hình đầu trong lúc GIF 750KB/208 khung còn đang tải.
+    img.onload = ()=> el.classList.add('playing');
+    img.src = src;
     el.appendChild(img);
-    el.classList.add('playing');
   });
 }
 
@@ -974,7 +910,7 @@ function renderInfo(){
   `;
 }
 
-function renderIconRow(containerId, items, size){
+function renderIconRow(containerId, items){
   const container = document.getElementById(containerId);
   items.forEach(item=>{
     const slug = typeof item === 'string' ? item : item.icon;
@@ -1321,7 +1257,6 @@ requestAnimationFrame(()=>{
   }, { passive:true });
   profileEl.addEventListener('touchend', resetTarget);
 })();
-
 </script>
 </body>
 </html>
