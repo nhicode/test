@@ -35,7 +35,7 @@
   body{
     font-family:'Nunito', sans-serif;
     color:var(--text);
-    /* Nền đặc, tối kiểu Discord thay cho video trang trí trước đây */
+    /* Nền đặc, tối kiểu Discord — video nền (nếu có) nằm ở lớp .bg-video-layer phía dưới */
     background:#1e1f22;
     overflow-x:hidden;
     /* Chặn bôi đen / copy chữ trên toàn trang */
@@ -43,6 +43,30 @@
     -moz-user-select:none;
     -ms-user-select:none;
     user-select:none;
+  }
+
+  /* ============================================================
+     VIDEO NỀN — lớp video cố định phủ toàn trang, đứng SAU mọi thứ
+     (khác với .profile-effect-layer, vốn chỉ "nháy" theo chu kỳ bên
+     trong khung thẻ). Đây là video nền thật sự, chạy liên tục.
+  ============================================================ */
+  .bg-video-layer{
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    overflow:hidden;
+    background:#1e1f22;
+  }
+  .bg-video-layer video{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    opacity:.4;
+  }
+  .bg-video-layer::after{
+    content:'';
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse at center, rgba(18,10,36,.25), rgba(18,10,36,.88) 78%);
   }
 
   /* ============================================================
@@ -197,7 +221,7 @@
   .deco-cat{
     position:absolute;
     width:32px; height:32px;
-    background-image:url(data:image/gif;base64,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);
+    background-image:url(data:image/gif;base64,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);
     background-repeat:no-repeat;
     image-rendering:pixelated;
     image-rendering:-moz-crisp-edges;
@@ -305,18 +329,27 @@
   .discord-avatar-wrap .discord-avatar{
     box-shadow:0 0 0 3px #1e1f22, 0 0 0 4px rgba(0,0,0,.55);
   }
-  .avatar-badge{
-    position:absolute;
-    width:15px; height:15px;
+
+  /* Cột tên + badge của avatar 2 — badge nằm DƯỚI tên, không gắn lên avatar nữa */
+  .discord-name-col{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    min-width:0;
+  }
+  .discord-badges-row{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .discord-badge-icon{
+    width:17px; height:17px;
     border-radius:50%;
     overflow:hidden;
-    border:2px solid #1e1f22;
     background:#1e1f22;
-    z-index:3;
+    flex-shrink:0;
   }
-  .avatar-badge img{ width:100%; height:100%; object-fit:cover; }
-  .avatar-badge.b1{ right:-4px; bottom:-3px; }
-  .avatar-badge.b2{ right:-4px; top:-3px; }
+  .discord-badge-icon img{ width:100%; height:100%; object-fit:cover; }
 
   .sparkle{
     position:absolute;
@@ -446,6 +479,9 @@
 </head>
 <body>
 
+<!-- ============ VIDEO NỀN (toàn trang, phía sau mọi thứ) ============ -->
+<div class="bg-video-layer" id="bgVideoLayer"></div>
+
 <!-- ============ BOOT SCREEN ============ -->
 <div id="boot">
   <div class="term-window">
@@ -494,10 +530,11 @@
         <div class="discord-avatar-wrap" id="discordAvatarWrap">
           <div class="avatar-deco" id="avatarDeco2"></div>
           <div class="discord-avatar" id="discordAvatarEl"></div>
-          <div class="avatar-badge b1" id="avatarBadge1"></div>
-          <div class="avatar-badge b2" id="avatarBadge2"></div>
         </div>
-        <div class="discord-name" id="discordNameEl"></div>
+        <div class="discord-name-col">
+          <div class="discord-name" id="discordNameEl"></div>
+          <div class="discord-badges-row" id="discordBadgesRow"></div>
+        </div>
       </div>
       <div class="discord-bio" id="discordBioEl"></div>
     </div>
@@ -548,14 +585,21 @@ const CONFIG = {
     "https://raw.githubusercontent.com/nhicode/ak/main/83d8a1eb09a8d64e59233eec5d4d5c2d.png"
   ],
 
-  // 2 video này vừa dùng làm "hiệu ứng hồ sơ" (phủ toàn khung profile),
-  // vừa dùng làm viền động quanh avatar 1 và avatar 2 — kết hợp lại thành 1 bộ hiệu ứng.
+  // "Hiệu ứng hồ sơ" — 2 video PHỦ TOÀN THẺ, chỉ "nháy" theo chu kỳ (giống Discord).
+  // Đây KHÔNG phải video nền và KHÔNG phải khung trang trí avatar nữa — 3 thứ này giờ tách riêng.
   profileEffectVideos: [
-    "https://raw.githubusercontent.com/nhicode/ak/refs/heads/main/RPReplay_Final1783737032.mov",
-    "https://raw.githubusercontent.com/nhicode/ak/refs/heads/main/RPReplay_Final1783736855.mov"
+    "https://raw.githubusercontent.com/nhicode/ak/main/profile-effect-1.mp4",
+    "https://raw.githubusercontent.com/nhicode/ak/main/profile-effect-2.mp4"
   ],
-  // Chu kỳ chạy hiệu ứng (ms) — giống Discord: không chạy liên tục mà "nháy" theo chu kỳ
+  // Chu kỳ chạy hiệu ứng hồ sơ (ms) — giống Discord: không chạy liên tục mà "nháy" theo chu kỳ
   effectIntervalMs: 10000,
+
+  // "Video nền" — chạy liên tục (loop), phủ toàn trang, phía SAU mọi thứ. Để trống ("") nếu không muốn dùng.
+  backgroundVideoUrl: "https://raw.githubusercontent.com/nhicode/ak/main/bg-video.mp4",
+
+  // "Khung trang trí ảnh đại diện" — viền động DÙNG RIÊNG cho avatar 1 và avatar 2, chạy loop liên tục
+  // (khác với profileEffectVideos ở trên, vốn chỉ nháy theo chu kỳ). Để trống ("") nếu không muốn dùng.
+  avatarDecoVideoUrl: "https://raw.githubusercontent.com/nhicode/ak/main/avatar-deco.mp4",
 
   // Danh sách icon mèo dễ thương — render bằng SVG nhúng thẳng (xem CAT_ICONS phía dưới),
   // không phải <img>/ảnh tải từ mạng ngoài, và không phụ thuộc mạng ngoài để hiện icon.
@@ -789,13 +833,19 @@ function renderAvatar(){
   });
 }
 
-// 2 badge nhỏ đính trên avatar 2 (kiểu trang trí góc avatar của Discord)
+// 2 icon badge — giờ nằm thành 1 hàng NGAY DƯỚI tên trong khu avatar 2,
+// không còn gắn/đè lên avatar 2 nữa.
 function renderAvatarBadges(){
   const urls = CONFIG.avatarBadges || [];
-  const b1 = document.getElementById('avatarBadge1');
-  const b2 = document.getElementById('avatarBadge2');
-  if(urls[0] && b1){ b1.innerHTML = `<img src="${urls[0]}" alt="badge">`; } else if(b1){ b1.remove(); }
-  if(urls[1] && b2){ b2.innerHTML = `<img src="${urls[1]}" alt="badge">`; } else if(b2){ b2.remove(); }
+  const row = document.getElementById('discordBadgesRow');
+  if(!row) return;
+  urls.forEach(url=>{
+    if(!url) return;
+    const box = document.createElement('div');
+    box.className = 'discord-badge-icon';
+    box.innerHTML = `<img src="${url}" alt="badge">`;
+    row.appendChild(box);
+  });
 }
 
 function buildEffectVideo(src){
@@ -810,36 +860,27 @@ function buildEffectVideo(src){
   return v;
 }
 
-// "Hiệu ứng hồ sơ" (phủ toàn khung) + "trang trí ảnh đại diện" (viền quanh avatar 1 & 2)
-// dùng chung 2 video, kết hợp lại (mix-blend-mode) và chỉ chạy 1 lượt mỗi 10 giây — giống Discord.
+// "Hiệu ứng hồ sơ" — CHỈ phủ toàn khung thẻ (.profile-effect-layer), chỉ chạy 1 lượt
+// mỗi effectIntervalMs giây rồi tắt — giống hiệu ứng hồ sơ (profile effect) của Discord.
+// Không còn dùng chung với khung trang trí avatar nữa (xem initAvatarDeco bên dưới).
 function initEffects(){
   const videos = CONFIG.profileEffectVideos || [];
   if(videos.length === 0) return;
 
   const effectLayer = document.getElementById('profileEffectLayer');
-  const decoTargets = [document.getElementById('avatarDeco1'), document.getElementById('avatarDeco2')].filter(Boolean);
+  if(!effectLayer) return;
   const allVideos = [];
 
-  if(effectLayer){
-    videos.forEach(src=>{
-      const v = buildEffectVideo(src);
-      effectLayer.appendChild(v);
-      allVideos.push(v);
-    });
-  }
-  decoTargets.forEach(target=>{
-    videos.forEach(src=>{
-      const v = buildEffectVideo(src);
-      target.appendChild(v);
-      allVideos.push(v);
-    });
+  videos.forEach(src=>{
+    const v = buildEffectVideo(src);
+    effectLayer.appendChild(v);
+    allVideos.push(v);
   });
 
-  const allLayers = [effectLayer, ...decoTargets].filter(Boolean);
   const burstDuration = Math.min((CONFIG.effectIntervalMs || 10000) - 500, 4000);
 
   function playBurst(){
-    allLayers.forEach(l=> l.classList.add('playing'));
+    effectLayer.classList.add('playing');
     allVideos.forEach(v=>{
       try{
         v.currentTime = 0;
@@ -847,13 +888,53 @@ function initEffects(){
         if(p && p.catch) p.catch(()=>{ /* trình duyệt chặn autoplay có âm thanh — video đã muted nên hiếm khi xảy ra */ });
       }catch(e){}
     });
-    setTimeout(()=> allLayers.forEach(l=> l.classList.remove('playing')), burstDuration);
+    setTimeout(()=> effectLayer.classList.remove('playing'), burstDuration);
   }
 
   setTimeout(()=>{
     playBurst();
     setInterval(playBurst, CONFIG.effectIntervalMs || 10000);
   }, 1200);
+}
+
+// "Khung trang trí ảnh đại diện" — viền động RIÊNG cho avatar 1 và avatar 2, chạy loop
+// LIÊN TỤC (không nháy theo chu kỳ như hiệu ứng hồ sơ ở trên), giống khung trang trí
+// avatar thật của Discord — nó luôn hiển thị chừng nào avatar còn hiển thị.
+function initAvatarDeco(){
+  const src = CONFIG.avatarDecoVideoUrl;
+  if(!src) return;
+  const targets = [document.getElementById('avatarDeco1'), document.getElementById('avatarDeco2')].filter(Boolean);
+  targets.forEach(target=>{
+    const v = buildEffectVideo(src);
+    v.loop = true;
+    target.appendChild(v);
+    target.classList.add('playing');
+    const p = v.play();
+    if(p && p.catch) p.catch(()=>{});
+  });
+}
+
+// "Video nền" — video chạy loop liên tục, phủ toàn trang, đứng phía sau mọi nội dung.
+function initBackgroundVideo(){
+  const src = CONFIG.backgroundVideoUrl;
+  const layer = document.getElementById('bgVideoLayer');
+  if(!src || !layer) return;
+  const v = document.createElement('video');
+  v.src = src;
+  v.muted = true;
+  v.loop = true;
+  v.playsInline = true;
+  v.autoplay = true;
+  v.preload = 'auto';
+  v.setAttribute('disablePictureInPicture', '');
+  v.setAttribute('disableRemotePlayback', '');
+  layer.appendChild(v);
+  const p = v.play();
+  if(p && p.catch) p.catch(()=>{ /* một số trình duyệt chặn autoplay cho tới khi có tương tác đầu tiên */
+    const resume = ()=>{ v.play().catch(()=>{}); document.removeEventListener('click', resume); document.removeEventListener('keydown', resume); };
+    document.addEventListener('click', resume, { once:true });
+    document.addEventListener('keydown', resume, { once:true });
+  });
 }
 
 // Chặn copy/chuột phải/phím tắt lưu-trang cơ bản — chỉ mang tính ngăn cản thông thường,
@@ -1235,7 +1316,9 @@ renderInfo();
 renderTechRow('techRow', CONFIG.techStack);
 renderIconRow('socialRow', CONFIG.socials);
 runBoot();
+initBackgroundVideo();
 initEffects();
+initAvatarDeco();
 initCopyProtection();
 requestAnimationFrame(()=>{
   const catEl = document.getElementById('decoCat');
