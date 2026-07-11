@@ -316,15 +316,10 @@
     transition:opacity .4s ease;
   }
   .avatar-deco.playing{ opacity:1; }
-  .avatar-deco video{
+  .avatar-deco canvas{
     position:absolute; inset:0;
     width:100%; height:100%;
-    object-fit:contain;
-    mix-blend-mode:screen;
-    /* Đẩy tương phản lên để phần nền đen của video "cháy" về đen tuyệt đối —
-       mix-blend-mode:screen sẽ biến đen tuyệt đối thành trong suốt hoàn toàn,
-       giúp viền/nền đen còn sót lại của video biến mất thay vì lộ thành khối xám mờ */
-    filter: brightness(1.12) contrast(1.35);
+    display:block;
   }
 
   .discord-avatar-wrap{
@@ -600,6 +595,15 @@ const CONFIG = {
 
   // Video "khung trang trí ảnh" — viền động LOOP LIÊN TỤC quanh avatar 1 và avatar 2 (luôn hiện, không nháy)
   avatarDecoVideoUrl: "https://raw.githubusercontent.com/nhicode/ak/main/RPReplay_Final1783736571.mov",
+  // Nền của video trên KHÔNG phải đen tuyệt đối mà là xám-đen rgb(53,50,54) (đo trực tiếp
+  // từ file gốc) — nên phải xoá nền bằng chroma-key (đổi đúng màu này thành trong suốt),
+  // mix-blend-mode không đủ vì nó chỉ "làm mờ" màu chứ không tạo alpha thật.
+  // Nếu sau này đổi sang video khác có nền màu khác, chỉnh lại `color` cho khớp màu nền mới.
+  avatarDecoChromaKey: {
+    color: [53, 50, 54],  // màu nền cần xoá (đo mẫu từ video)
+    solid: 20,             // khoảng cách màu trong ngưỡng này: xoá hẳn (alpha = 0)
+    feather: 46            // khoảng cách màu ngoài ngưỡng này: giữ nguyên (alpha = 255) — giữa 2 mốc là viền mờ dần cho đỡ răng cưa
+  },
 
   // Danh sách icon mèo dễ thương — render bằng SVG nhúng thẳng (xem CAT_ICONS phía dưới),
   // không phải <img>/ảnh tải từ mạng ngoài, và không phụ thuộc mạng ngoài để hiện icon.
@@ -904,18 +908,92 @@ function initEffects(){
   }, 1200);
 }
 
-function initAvatarDeco(){
+// Khung trang trí avatar: xoá nền bằng chroma-key thật (không dùng mix-blend-mode nữa).
+// Cách làm: 1 video nguồn ẩn dùng chung cho cả 2 avatar (đỡ giải mã video 2 lần), mỗi
+// khung hình được vẽ ra canvas nháp độ phân giải thấp, quét từng pixel — pixel nào gần
+// màu nền (theo CONFIG.avatarDecoChromaKey) thì set alpha = 0 (trong suốt thật, không
+// còn sót viền xám mờ), rồi vẽ kết quả (đã có alpha) sang canvas hiển thị của từng avatar.
+function initAvatarDecoChromaKey(){
   const url = CONFIG.avatarDecoVideoUrl;
   if(!url) return;
-  const decoTargets = [document.getElementById('avatarDeco1'), document.getElementById('avatarDeco2')].filter(Boolean);
-  decoTargets.forEach(target=>{
-    const v = buildEffectVideo(url);
-    v.loop = true;
-    target.appendChild(v);
-    target.classList.add('playing');
-    const p = v.play();
-    if(p && p.catch) p.catch(()=>{});
+  const targets = [document.getElementById('avatarDeco1'), document.getElementById('avatarDeco2')].filter(Boolean);
+  if(targets.length === 0) return;
+
+  const key = (CONFIG.avatarDecoChromaKey && CONFIG.avatarDecoChromaKey.color) || [0,0,0];
+  const solid = (CONFIG.avatarDecoChromaKey && CONFIG.avatarDecoChromaKey.solid) ?? 20;
+  const feather = (CONFIG.avatarDecoChromaKey && CONFIG.avatarDecoChromaKey.feather) ?? 46;
+  const WORK_MAX = 260; // độ phân giải xử lý pixel — đủ nét cho khung quanh avatar nhỏ, nhẹ máy hơn nhiều so với xử lý full-res gốc
+
+  const video = document.createElement('video');
+  video.src = url;
+  video.muted = true;
+  video.loop = true;
+  video.playsInline = true;
+  video.preload = 'auto';
+  video.setAttribute('disablePictureInPicture', '');
+  video.setAttribute('disableRemotePlayback', '');
+  // Phải gắn vào document (ẩn đi) — video tồn tại ngoài DOM dễ bị một số trình duyệt
+  // di động tạm dừng/giảm tải, gây đứng hình khung trang trí.
+  video.style.cssText = 'position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; left:-9999px;';
+  document.body.appendChild(video);
+
+  const work = document.createElement('canvas');
+  const workCtx = work.getContext('2d', { willReadFrequently:true });
+  let workW = 0, workH = 0;
+
+  const displays = targets.map(el=>{
+    const c = document.createElement('canvas');
+    c.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
+    el.appendChild(c);
+    return { canvas:c, ctx:c.getContext('2d') };
   });
+
+  function ensureWorkSize(){
+    if(workW) return;
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if(!vw || !vh) return;
+    const scale = WORK_MAX / Math.max(vw, vh);
+    workW = Math.max(1, Math.round(vw*scale));
+    workH = Math.max(1, Math.round(vh*scale));
+    work.width = workW; work.height = workH;
+  }
+
+  function drawFrame(){
+    if(video.readyState >= 2){
+      ensureWorkSize();
+      if(workW){
+        workCtx.drawImage(video, 0, 0, workW, workH);
+        const frame = workCtx.getImageData(0, 0, workW, workH);
+        const d = frame.data;
+        for(let i=0; i<d.length; i+=4){
+          const dr = d[i]-key[0], dg = d[i+1]-key[1], db = d[i+2]-key[2];
+          const dist = Math.sqrt(dr*dr + dg*dg + db*db);
+          d[i+3] = dist <= solid ? 0 : dist >= feather ? 255 : Math.round((dist-solid)/(feather-solid)*255);
+        }
+        workCtx.putImageData(frame, 0, 0);
+        displays.forEach(({canvas, ctx})=>{
+          const cw = canvas.clientWidth, ch = canvas.clientHeight;
+          if(!cw || !ch) return;
+          if(canvas.width !== cw) canvas.width = cw;
+          if(canvas.height !== ch) canvas.height = ch;
+          // Giữ tỉ lệ khung hình gốc (kiểu object-fit:contain) thay vì kéo giãn méo hình
+          const scale = Math.min(cw/workW, ch/workH);
+          const dw = workW*scale, dh = workH*scale;
+          const dx = (cw-dw)/2, dy = (ch-dh)/2;
+          ctx.clearRect(0, 0, cw, ch);
+          ctx.drawImage(work, dx, dy, dw, dh);
+        });
+      }
+    }
+    requestAnimationFrame(drawFrame);
+  }
+
+  video.addEventListener('loadeddata', ()=>{
+    const p = video.play();
+    if(p && p.catch) p.catch(()=>{});
+    targets.forEach(t=> t.classList.add('playing'));
+    requestAnimationFrame(drawFrame);
+  }, { once:true });
 }
 
 // Video nền toàn trang, nằm phía sau card — loop liên tục, có âm thanh sau khi người dùng tương tác.
@@ -1286,7 +1364,7 @@ renderIconRow('socialRow', CONFIG.socials);
 runBoot();
 initBackgroundVideo();
 initEffects();
-initAvatarDeco();
+initAvatarDecoChromaKey();
 initCopyProtection();
 requestAnimationFrame(()=>{
   const catEl = document.getElementById('decoCat');
