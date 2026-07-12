@@ -284,9 +284,23 @@
     mix-blend-mode:screen;
   }
 
+  /* Khung trang trí avatar — kích thước tính TOÁN CHÍNH XÁC từ chính file GIF
+     (canvas gốc 322×240px, phần hình vẽ (halo+2 tay) rộng 212px và nằm chính giữa
+     canvas cả theo chiều ngang lẫn dọc). Nghĩa là để phần hình vẽ ôm vừa khít quanh
+     avatar, khung ảnh phải rộng = đường kính avatar × (322/212) ≈ 151.89% kích thước
+     avatar, và giữ đúng tỉ lệ khung hình gốc 322:240 bằng aspect-ratio — rồi canh
+     giữa bằng left/top 50% + translate(-50%,-50%). Vì tất cả đều tính theo %
+     của .avatar-wrap / .discord-avatar-wrap (không phải px cố định), công thức
+     này tự động đúng cho CẢ avatar 1 (112px) lẫn avatar 2 (34px), trên mọi kích
+     thước màn hình — không còn bị lệch/kẹp méo như kiểu object-fit:contain trong
+     hộp vuông trước đây (ảnh gốc không vuông nên bị "đệm" lệch tâm). */
   .avatar-deco{
     position:absolute;
-    inset:-22%;
+    left:50%;
+    top:50%;
+    width:151.89%;
+    aspect-ratio:322/240;
+    transform:translate(-50%,-50%);
     pointer-events:none;
     z-index:3;
     opacity:0;
@@ -296,7 +310,7 @@
   .avatar-deco img{
     position:absolute; inset:0;
     width:100%; height:100%;
-    object-fit:contain;
+    object-fit:fill;
     display:block;
     pointer-events:none;
     -webkit-user-drag:none;
@@ -819,8 +833,6 @@ function initAvatarDeco(){
     img.decoding = 'async';
     img.alt = '';
     img.draggable = false;
-    // Chỉ đánh dấu "playing" (hiện ra) SAU KHI ảnh đã tải xong, để không bao giờ
-    // thấy khung viền đứng hình ở khung hình đầu trong lúc GIF 750KB/208 khung còn đang tải.
     img.onload = ()=> el.classList.add('playing');
     img.src = src;
     el.appendChild(img);
