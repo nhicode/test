@@ -7,7 +7,6 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐱</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="image" href="https://raw.githubusercontent.com/nhicode/test/main/output_transparent_halo.gif">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -21,6 +20,8 @@
     --mint:#6be8c9;
     --text:#f5f1ff;
     --muted:#b8adda;
+    /* Canh vị trí khuôn mặt/đầu trong khung tròn avatar. "center 20%" nghĩa là
+       neo 20% từ trên xuống — tăng % nếu đầu vẫn bị cắt, giảm nếu bị lệch xuống dưới. */
     --avatar-pos: center 20%;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -34,36 +35,19 @@
   body{
     font-family:'Nunito', sans-serif;
     color:var(--text);
+    /* Nền đặc, tối kiểu Discord thay cho video trang trí trước đây */
     background:#1e1f22;
     overflow-x:hidden;
+    /* Chặn bôi đen / copy chữ trên toàn trang */
     -webkit-user-select:none;
     -moz-user-select:none;
     -ms-user-select:none;
     user-select:none;
   }
 
-  .bg-video-wrap{
-    position:fixed;
-    inset:0;
-    z-index:-1;
-    overflow:hidden;
-    background:#1e1f22;
-  }
-  .bg-video-wrap video{
-    position:absolute;
-    top:50%; left:50%;
-    min-width:100%; min-height:100%;
-    width:auto; height:auto;
-    transform:translate(-50%,-50%);
-    object-fit:cover;
-    filter:brightness(.55) saturate(1.1);
-  }
-  .bg-video-wrap::after{
-    content:"";
-    position:absolute; inset:0;
-    background:rgba(18,10,36,.35);
-  }
-
+  /* ============================================================
+     BOOT / TERMINAL SCREEN
+  ============================================================ */
   #boot{
     position:fixed; inset:0;
     background:#000;
@@ -129,6 +113,9 @@
   }
   @keyframes blinkPrompt{ 50%{ opacity:.35; } }
 
+  /* ============================================================
+     PROFILE PAGE
+  ============================================================ */
   #profile{
     min-height:100vh;
     display:flex;
@@ -183,6 +170,8 @@
     }
   }
   .card.in{ opacity:1; transform:translateY(0) scale(1); }
+  /* Trong lúc đang nghiêng theo con trỏ, transform phải đổi NHANH (linear),
+     nếu không nó sẽ bị kẹt vào transition .7s ở trên và trông như "đứng hình" / lệch. */
   .card.tilting{ transition:opacity .7s ease, transform .05s linear, box-shadow 2.4s ease-in-out; }
 
   .deco-ring{
@@ -218,6 +207,8 @@
     cursor:grab;
     z-index:6;
     filter:drop-shadow(0 0 3px rgba(255,255,255,.4));
+    /* Chặn menu bấm-giữ (Save Image/Chia sẻ/lookup...) và việc trình duyệt coi mèo
+       là ảnh có thể kéo/copy — để bấm-giữ chỉ có nghĩa là kéo-thả, không gì khác */
     -webkit-touch-callout:none;
     -webkit-user-select:none;
     -webkit-user-drag:none;
@@ -227,6 +218,7 @@
     -ms-user-select:none;
   }
   .deco-cat.dragging{ cursor:grabbing; }
+
 
   .avatar-wrap{
     position:relative;
@@ -265,12 +257,11 @@
   }
   .avatar img{ width:100%; height:100%; object-fit:cover; object-position:var(--avatar-pos, center 20%); }
 
+  /* "Hiệu ứng hồ sơ" — 2 video phủ toàn khung profile, chỉ "nháy" theo chu kỳ cho giống Discord */
   .profile-effect-layer{
     position:absolute; inset:0;
     border-radius:26px;
     overflow:hidden;
-    clip-path: inset(0 round 26px);
-    -webkit-clip-path: inset(0 round 26px);
     pointer-events:none;
     z-index:1;
     opacity:0;
@@ -284,22 +275,27 @@
     mix-blend-mode:screen;
   }
 
+  /* "Trang trí ảnh đại diện" — dùng ảnh GIF động do bạn cung cấp (halo + 2 tay), phủ NGOÀI
+     viền avatar giống Discord thật. Ảnh gốc là khung 322×240px nhưng phần hình vẽ thật sự
+     (halo + tay) chỉ chiếm một vùng ~214×218px nằm giữa khung đó — phần còn lại là khoảng
+     trống trong suốt lãng phí, thừa từ file gốc. Đo trực tiếp trên toàn bộ animation (không
+     chỉ 1 khung hình) và không đổi qua các khung hình. Nếu chỉ scale nguyên khung 322×240 áp
+     lên avatar (như trước) thì phần hình vẽ sẽ bị co nhỏ lại và dạt sang một góc — ĐÓ LÀ LỖI
+     ĐÃ GẶP. Cách đúng: dùng background-image + background-size để "crop" bỏ khoảng trống thừa,
+     chỉ phóng to đúng vùng có hình, rồi canh giữa lên avatar. Cả khối .avatar-deco được set to
+     hơn avatar (150%/153%) để phần halo/tay tràn ra ngoài viền avatar, giống Discord. */
   .avatar-deco{
     position:absolute;
-    inset:-22%;
+    left:50%;
+    top:50%;
+    width:150%;
+    height:153%;
+    transform:translate(-50%,-50%);
     pointer-events:none;
     z-index:3;
-    opacity:0;
-    transition:opacity .4s ease;
-  }
-  .avatar-deco.playing{ opacity:1; }
-  .avatar-deco img{
-    position:absolute; inset:0;
-    width:100%; height:100%;
-    object-fit:contain;
-    display:block;
-    pointer-events:none;
-    -webkit-user-drag:none;
+    background-repeat:no-repeat;
+    background-position:center center;
+    background-size:139.3% 101.9%;
   }
 
   .discord-avatar-wrap{
@@ -307,25 +303,23 @@
     width:34px; height:34px;
     flex-shrink:0;
   }
+  /* Vòng viền đen kiểu Discord quanh avatar nhỏ */
   .discord-avatar-wrap .discord-avatar{
     box-shadow:0 0 0 3px #1e1f22, 0 0 0 4px rgba(0,0,0,.55);
   }
-  .discord-user-info{
-    display:flex;
-    flex-direction:column;
-    gap:5px;
-    min-width:0;
-  }
-  .discord-badge-row{
-    display:flex;
-    gap:5px;
-  }
-  .discord-badge-row img{
-    width:16px; height:16px;
+  .avatar-badge{
+    position:absolute;
+    width:15px; height:15px;
     border-radius:50%;
-    object-fit:cover;
-    box-shadow:0 0 0 2px rgba(0,0,0,.4);
+    overflow:hidden;
+    border:2px solid #1e1f22;
+    background:#1e1f22;
+    z-index:3;
   }
+  .avatar-badge img{ width:100%; height:100%; object-fit:cover; }
+  .avatar-badge.b1{ right:-4px; bottom:-3px; }
+  .avatar-badge.b2{ right:-4px; top:-3px; }
+
 
   .sparkle{
     position:absolute;
@@ -455,8 +449,7 @@
 </head>
 <body>
 
-<div class="bg-video-wrap" id="bgVideoWrap"></div>
-
+<!-- ============ BOOT SCREEN ============ -->
 <div id="boot">
   <div class="term-window">
     <div class="term-bar">
@@ -471,14 +464,15 @@
   </div>
 </div>
 
+<!-- ============ PROFILE PAGE ============ -->
 <div id="profile">
   <div class="card" id="card">
     <div class="profile-effect-layer" id="profileEffectLayer"></div>
 
     <div class="avatar-wrap" id="avatarWrap">
       <div class="avatar-ring"></div>
-      <div class="avatar" id="avatarEl"></div>
       <div class="avatar-deco" id="avatarDeco1"></div>
+      <div class="avatar" id="avatarEl"></div>
     </div>
 
     <div class="title-line"><span id="typedTitle"></span><span class="title-cursor"></span></div>
@@ -501,13 +495,12 @@
     <div class="discord-box">
       <div class="discord-user">
         <div class="discord-avatar-wrap" id="discordAvatarWrap">
-          <div class="discord-avatar" id="discordAvatarEl"></div>
           <div class="avatar-deco" id="avatarDeco2"></div>
+          <div class="discord-avatar" id="discordAvatarEl"></div>
+          <div class="avatar-badge b1" id="avatarBadge1"></div>
+          <div class="avatar-badge b2" id="avatarBadge2"></div>
         </div>
-        <div class="discord-user-info">
-          <div class="discord-name" id="discordNameEl"></div>
-          <div class="discord-badge-row" id="discordBadgeRow"></div>
-        </div>
+        <div class="discord-name" id="discordNameEl"></div>
       </div>
       <div class="discord-bio" id="discordBioEl"></div>
     </div>
@@ -524,9 +517,14 @@
 </div>
 
 <script>
+/* ============================================================
+   CẤU HÌNH — chỉnh mọi thông tin cá nhân ở đây
+============================================================ */
 const CONFIG = {
-  avatarEmoji: "🐱",
+  avatarEmoji: "🐱",          // avatar mặc định nếu ảnh lỗi
+  // Ảnh avatar chính (ảnh 1) — giữ nguyên như cũ
   avatarImageUrl: "https://raw.githubusercontent.com/nhicode/ak/main/att.Wkk_rbqxuLz2maSWtCfWcpA-4q-CESDrREJ9E_SpU7U.png.jpeg",
+  // Ảnh riêng biệt chỉ dùng để vẽ ASCII lúc màn hình boot — khác với avatar chính
   bootImageUrl: "https://raw.githubusercontent.com/nhicode/ak/main/IMG_4172.jpeg",
 
   titles: [
@@ -535,6 +533,7 @@ const CONFIG = {
   ],
 
   discordUsername: "stfmie - mi",
+  // Ảnh avatar 2 (avatar nhỏ trong khung Discord)
   discordAvatarUrl: "https://raw.githubusercontent.com/nhicode/ak/main/IMG_2251.webp",
   bioLines: [
     "Discord: stfmie",
@@ -546,22 +545,27 @@ const CONFIG = {
   school: "North Korea",
   country: "",
 
+  // 2 badge nhỏ đính trên avatar 2, kiểu "trang trí ảnh đại diện" của Discord
   avatarBadges: [
     "https://raw.githubusercontent.com/nhicode/ak/main/IMG_4175.png",
     "https://raw.githubusercontent.com/nhicode/ak/main/83d8a1eb09a8d64e59233eec5d4d5c2d.png"
   ],
 
-  backgroundVideoUrl: "https://raw.githubusercontent.com/nhicode/ak/main/o0fqgQDIDCXehCEOAEfCA1TkyFn72NDIp5yjzV.mp4",
-
+  // 2 video này vừa dùng làm "hiệu ứng hồ sơ" (phủ toàn khung profile),
+  // vừa dùng làm viền động quanh avatar 1 và avatar 2 — kết hợp lại thành 1 bộ hiệu ứng.
   profileEffectVideos: [
-    "https://raw.githubusercontent.com/nhicode/ak/main/RPReplay_Final1783737032.mov",
-    "https://raw.githubusercontent.com/nhicode/ak/main/RPReplay_Final1783736855.mov"
+    "https://raw.githubusercontent.com/nhicode/ak/refs/heads/main/RPReplay_Final1783737032.mov",
+    "https://raw.githubusercontent.com/nhicode/ak/refs/heads/main/RPReplay_Final1783736855.mov"
   ],
+  // Chu kỳ chạy hiệu ứng (ms) — giống Discord: không chạy liên tục mà "nháy" theo chu kỳ
   effectIntervalMs: 10000,
 
-  // Khung trang trí avatar — GIF động (đã có nền trong suốt sẵn) dùng chung cho avatar 1 và avatar 2
+  // Khung trang trí avatar — GIF động (đã có nền trong suốt sẵn) do bạn cung cấp, dùng
+  // background-image + background-size để crop đúng phần hình vẽ (xem CSS .avatar-deco)
   avatarDecoImageUrl: "https://raw.githubusercontent.com/nhicode/test/main/output_transparent_halo.gif",
 
+  // Danh sách icon mèo dễ thương — render bằng SVG nhúng thẳng (xem CAT_ICONS phía dưới),
+  // không phải <img>/ảnh tải từ mạng ngoài, và không phụ thuộc mạng ngoài để hiện icon.
   techStack: [
     "catface","pawprint","yarnball","fish","catears","milkbowl","mousetoy",
     "catbell","sleepingcat","whiskers","pawheart","pawtrail","catcollar","doublepaws"
@@ -574,6 +578,9 @@ const CONFIG = {
   systemLabel: "Windows 11"
 };
 
+/* ============================================================
+   BOOT: ASCII từ emoji + hiệu ứng "giải mã"
+============================================================ */
 function buildAsciiFromEmoji(emoji, cols, rows){
   const cw = 12, ch = 24;
   const canvas = document.createElement('canvas');
@@ -618,6 +625,7 @@ function buildAsciiFromImage(imgUrl, cols, rows){
       const canvas = document.createElement('canvas');
       canvas.width = cols*cw; canvas.height = rows*ch;
       const ctx = canvas.getContext('2d');
+      // crop ảnh thành hình vuông ở giữa rồi vẽ full khung để nét hơn
       const side = Math.min(img.naturalWidth, img.naturalHeight);
       const sx = (img.naturalWidth - side)/2, sy = (img.naturalHeight - side)/2;
       ctx.drawImage(img, sx, sy, side, side, 0, 0, canvas.width, canvas.height);
@@ -649,6 +657,39 @@ function buildAsciiFromImage(imgUrl, cols, rows){
   });
 }
 
+function animateAsciiReveal(targetLines, el, duration){
+  return new Promise(resolve=>{
+    const rows = targetLines.length;
+    const cols = targetLines[0].length;
+    const finishTimes = targetLines.map(()=>
+      Array.from({length:cols}, ()=> Math.random()*duration*0.75)
+    );
+    const glitch = "!<>-_\\/[]{}=+*^?#";
+    const start = performance.now();
+    function frame(now){
+      const t = now - start;
+      let out = '';
+      for(let r=0;r<rows;r++){
+        let line = '';
+        for(let c=0;c<cols;c++){
+          const target = targetLines[r][c];
+          if(target === ' '){ line += ' '; continue; }
+          line += (t >= finishTimes[r][c]) ? target : glitch[(Math.random()*glitch.length)|0];
+        }
+        out += line + '\n';
+      }
+      el.textContent = out;
+      if(t < duration){
+        requestAnimationFrame(frame);
+      } else {
+        el.textContent = targetLines.join('\n');
+        resolve();
+      }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
 function animateAsciiTypewriter(targetLines, el, totalDuration){
   return new Promise(resolve=>{
     const rows = targetLines.length;
@@ -657,6 +698,8 @@ function animateAsciiTypewriter(targetLines, el, totalDuration){
     const start = performance.now();
     function frame(now){
       const elapsed = now - start;
+      // Bao nhiêu ký tự đáng lẽ đã hiện ra tính theo thời gian trôi qua,
+      // thay vì đặt 1 setTimeout cho từng ký tự (rất nặng máy, gây giật lag cho toàn trang).
       const shown = Math.min(totalChars, Math.ceil((elapsed/totalDuration) * totalChars));
       let out = '';
       let count = 0;
@@ -690,6 +733,15 @@ function addBootLine(container, text, cls){
   });
 }
 
+function detectSystem(){
+  const ua = navigator.userAgent;
+  if(/Windows/.test(ua)) return "Windows";
+  if(/Mac OS X/.test(ua)) return /iPhone|iPad|iPod/.test(ua) ? "iOS" : "macOS";
+  if(/Android/.test(ua)) return "Android";
+  if(/Linux/.test(ua)) return "Linux";
+  return "Unknown";
+}
+
 async function runBoot(){
   const asciiEl = document.getElementById('asciiArt');
   const linesEl = document.getElementById('bootLines');
@@ -702,13 +754,13 @@ async function runBoot(){
   }
 
   await animateAsciiTypewriter(ascii, asciiEl, 500);
+
   await addBootLine(linesEl, "Press Enter / Click To Continue", "prompt");
 
   const proceed = ()=>{
     document.getElementById('boot').classList.add('hide');
     document.removeEventListener('keydown', onKey);
     document.getElementById('boot').removeEventListener('click', proceed);
-    unlockMedia();
     setTimeout(showProfile, 500);
   };
   const onKey = (e)=>{ if(e.key === 'Enter') proceed(); };
@@ -716,6 +768,9 @@ async function runBoot(){
   document.getElementById('boot').addEventListener('click', proceed);
 }
 
+/* ============================================================
+   PROFILE: render nội dung từ CONFIG
+============================================================ */
 function renderAvatar(){
   const el = document.getElementById('avatarEl');
   if(CONFIG.avatarImageUrl){
@@ -723,6 +778,7 @@ function renderAvatar(){
   } else {
     el.textContent = CONFIG.avatarEmoji;
   }
+  // sparkle particles quanh avatar
   const wrap = document.getElementById('avatarWrap');
   const positions = [
     {top:'-6px', left:'6px', delay:'0s'},
@@ -740,23 +796,19 @@ function renderAvatar(){
   });
 }
 
+// 2 badge nhỏ đính trên avatar 2 (kiểu trang trí góc avatar của Discord)
 function renderAvatarBadges(){
   const urls = CONFIG.avatarBadges || [];
-  const row = document.getElementById('discordBadgeRow');
-  if(!row) return;
-  urls.forEach(url=>{
-    const img = document.createElement('img');
-    img.src = url;
-    img.alt = 'badge';
-    row.appendChild(img);
-  });
+  const b1 = document.getElementById('avatarBadge1');
+  const b2 = document.getElementById('avatarBadge2');
+  if(urls[0] && b1){ b1.innerHTML = `<img src="${urls[0]}" alt="badge">`; } else if(b1){ b1.remove(); }
+  if(urls[1] && b2){ b2.innerHTML = `<img src="${urls[1]}" alt="badge">`; } else if(b2){ b2.remove(); }
 }
 
-function buildEffectVideo(src, opts){
-  opts = opts || {};
+function buildEffectVideo(src){
   const v = document.createElement('video');
   v.src = src;
-  v.muted = opts.muted !== false;
+  v.muted = true;
   v.playsInline = true;
   v.loop = false;
   v.preload = 'auto';
@@ -765,18 +817,8 @@ function buildEffectVideo(src, opts){
   return v;
 }
 
-let mediaUnlocked = false;
-const videosNeedingSound = [];
-function unlockMedia(){
-  if(mediaUnlocked) return;
-  mediaUnlocked = true;
-  videosNeedingSound.forEach(v=>{
-    v.muted = false;
-    const p = v.play();
-    if(p && p.catch) p.catch(()=>{});
-  });
-}
-
+// "Hiệu ứng hồ sơ" (phủ toàn khung) + "trang trí ảnh đại diện" (viền quanh avatar 1 & 2)
+// dùng chung 2 video, kết hợp lại (mix-blend-mode) và chỉ chạy 1 lượt mỗi 10 giây — giống Discord.
 function initEffects(){
   const videos = CONFIG.profileEffectVideos || [];
   const effectLayer = document.getElementById('profileEffectLayer');
@@ -797,7 +839,7 @@ function initEffects(){
       try{
         v.currentTime = 0;
         const p = v.play();
-        if(p && p.catch) p.catch(()=>{});
+        if(p && p.catch) p.catch(()=>{ /* trình duyệt chặn autoplay có âm thanh — video đã muted nên hiếm khi xảy ra */ });
       }catch(e){}
     });
     setTimeout(()=> effectLayer.classList.remove('playing'), burstDuration);
@@ -809,35 +851,20 @@ function initEffects(){
   }, 1200);
 }
 
+// Khung trang trí avatar — dùng ảnh GIF của bạn, set làm background-image (không phải <img>)
+// để background-size/position tự "crop" bỏ khoảng trống thừa trong file gốc và phóng to
+// đúng phần hình vẽ (xem giải thích chi tiết trong CSS .avatar-deco phía trên).
 function initAvatarDeco(){
   const src = CONFIG.avatarDecoImageUrl;
   if(!src) return;
   const targets = [document.getElementById('avatarDeco1'), document.getElementById('avatarDeco2')].filter(Boolean);
   targets.forEach(el=>{
-    const img = document.createElement('img');
-    img.loading = 'eager';
-    img.decoding = 'async';
-    img.alt = '';
-    img.draggable = false;
-    // Chỉ đánh dấu "playing" (hiện ra) SAU KHI ảnh đã tải xong, để không bao giờ
-    // thấy khung viền đứng hình ở khung hình đầu trong lúc GIF 750KB/208 khung còn đang tải.
-    img.onload = ()=> el.classList.add('playing');
-    img.src = src;
-    el.appendChild(img);
+    el.style.backgroundImage = `url("${src}")`;
   });
 }
 
-function initBackgroundVideo(){
-  const wrap = document.getElementById('bgVideoWrap');
-  if(!wrap || !CONFIG.backgroundVideoUrl) return;
-  const v = buildEffectVideo(CONFIG.backgroundVideoUrl, { muted:true });
-  v.loop = true;
-  wrap.appendChild(v);
-  videosNeedingSound.push(v);
-  const p = v.play();
-  if(p && p.catch) p.catch(()=>{});
-}
-
+// Chặn copy/chuột phải/phím tắt lưu-trang cơ bản — chỉ mang tính ngăn cản thông thường,
+// không thể chặn tuyệt đối người dùng cố tình dùng công cụ dev của trình duyệt.
 function initCopyProtection(){
   document.addEventListener('contextmenu', e=> e.preventDefault());
   document.addEventListener('selectstart', e=> e.preventDefault());
@@ -910,7 +937,7 @@ function renderInfo(){
   `;
 }
 
-function renderIconRow(containerId, items){
+function renderIconRow(containerId, items, size){
   const container = document.getElementById(containerId);
   items.forEach(item=>{
     const slug = typeof item === 'string' ? item : item.icon;
@@ -923,6 +950,8 @@ function renderIconRow(containerId, items){
     img.alt = slug;
     let triedFallback = false;
     img.onerror = function(){
+      // Thử nguồn CDN dự phòng (jsDelivr) trước khi bỏ cuộc — nhiều trường hợp
+      // "icon bị thiếu" chỉ là do cdn.simpleicons.org bị chặn/lag chứ không phải sai tên icon.
       if(!triedFallback){
         triedFallback = true;
         img.src = `https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/${slug}.svg`;
@@ -939,6 +968,9 @@ function renderIconRow(containerId, items){
   });
 }
 
+// Toàn bộ icon mèo được nhúng thẳng dưới dạng SVG tự vẽ (không phải <img>/ảnh),
+// nên không bị trình duyệt coi là "ảnh" để hiện menu bấm-giữ (Lưu ảnh/Chia sẻ...),
+// và không phụ thuộc mạng ngoài để tải icon nữa.
 const CAT_ICONS = {
   "catface": { label: "Cat face", svg: "<svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\" role=\"img\" aria-label=\"Cat face\"><path fill=\"#F5F1FF\" d=\"M12 3.5c-.9 0-1.6.9-1.9 2.1C7.9 5.1 5.6 4.2 4.2 3c-.4-.3-.9 0-.8.5.3 1.7 1.1 3.4 2.2 4.6C4.6 9.4 4 11.1 4 13c0 4.4 3.6 7 8 7s8-2.6 8-7c0-1.9-.6-3.6-1.6-4.9 1.1-1.2 1.9-2.9 2.2-4.6.1-.5-.4-.8-.8-.5-1.4 1.2-3.7 2.1-5.9 2.6C13.6 4.4 12.9 3.5 12 3.5z\"/><circle cx=\"9.3\" cy=\"13\" r=\"1.15\" fill=\"#241A3D\"/><circle cx=\"14.7\" cy=\"13\" r=\"1.15\" fill=\"#241A3D\"/><path fill=\"#FF6FA8\" d=\"M12 14.3l-1.1 1.1h2.2z\"/><path stroke=\"#241A3D\" stroke-width=\".4\" stroke-linecap=\"round\" d=\"M6 14.6 3 14M6 15.6 3.2 16.4M18 14.6l3-.6M18 15.6l2.8 1.4\"/></svg>" },
   "pawprint": { label: "Paw print", svg: "<svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\" role=\"img\" aria-label=\"Paw print\"><ellipse cx=\"12\" cy=\"16.2\" rx=\"5.2\" ry=\"4.3\" fill=\"#FF6FA8\"/><circle cx=\"5.6\" cy=\"10.4\" r=\"2.1\" fill=\"#FF6FA8\"/><circle cx=\"10.4\" cy=\"6.6\" r=\"2.3\" fill=\"#FF6FA8\"/><circle cx=\"14.9\" cy=\"6.6\" r=\"2.3\" fill=\"#FF6FA8\"/><circle cx=\"18.7\" cy=\"10.4\" r=\"2.1\" fill=\"#FF6FA8\"/></svg>" },
@@ -969,9 +1001,16 @@ function renderTechRow(containerId, slugs){
   });
 }
 
+/* ============================================================
+   MÈO ONEKO THẬT: port lại đúng state machine gốc của oneko.js
+   (idle / alert / scratchSelf / scratchWall / sleeping / 8 hướng đi),
+   chỉ đổi phần định vị từ "theo cả cửa sổ" sang "giữ trong viền thẻ",
+   và thêm khả năng kéo-thả bằng tay. Sprite + logic gốc: MIT License,
+   https://github.com/adryd325/oneko.js
+============================================================ */
 function initCat(catEl){
   const cardEl = catEl.closest('.card');
-  const margin = 16;
+  const margin = 16;      // nửa kích thước sprite (32px) để không bị cắt hình ở viền
   const nekoSpeed = 10;
 
   const spriteSets = {
@@ -1000,7 +1039,7 @@ function initCat(catEl){
   let idleTime = 0;
   let idleAnimation = null;
   let idleAnimationFrame = 0;
-  let mode = 'auto';
+  let mode = 'auto';    // 'auto' | 'dragging'
   let pointerId = null;
   let ready = false;
 
@@ -1090,6 +1129,7 @@ function initCat(catEl){
     render();
   }
 
+  // Vị trí + "con trỏ" khởi đầu: đứng yên ở góc dưới-phải của thẻ, không lao đi ngay lúc vừa tải trang
   requestAnimationFrame(()=>{
     const b = bounds();
     nekoPosX = b.maxX;
@@ -1107,10 +1147,12 @@ function initCat(catEl){
     mousePosY = clientY - rect.top;
   }
 
+  // Mèo luôn để ý con trỏ ở bất kỳ đâu trên trang — đúng cảm giác gốc của oneko
   document.addEventListener('pointermove', (e)=>{
     if(mode === 'dragging') return;
     setMouseFromClient(e.clientX, e.clientY);
   });
+  // Di động không có hover, phải bám theo cả cử chỉ chạm/vuốt trên thẻ
   cardEl.addEventListener('touchstart', (e)=>{
     if(mode === 'dragging') return;
     const t = e.touches[0];
@@ -1134,9 +1176,11 @@ function initCat(catEl){
   }
   requestAnimationFrame(onAnimationFrame);
 
+  // Chặn menu bấm-giữ / bảng chọn của trình duyệt (Save Image, Chia sẻ, Lookup...)
   catEl.addEventListener('contextmenu', (e)=> e.preventDefault());
   catEl.addEventListener('dragstart', (e)=> e.preventDefault());
 
+  // Kéo - thả trực tiếp con mèo
   catEl.addEventListener('pointerdown', (e)=>{
     if(!ready) return;
     mode = 'dragging';
@@ -1159,7 +1203,7 @@ function initCat(catEl){
     if(mode !== 'dragging') return;
     mode = 'auto';
     catEl.classList.remove('dragging');
-    mousePosX = nekoPosX; mousePosY = nekoPosY;
+    mousePosX = nekoPosX; mousePosY = nekoPosY; // thả ra là đứng yên tại chỗ, không lao đi ngay
     idleTime = 0;
     frameCount = 0;
   }
@@ -1170,6 +1214,9 @@ function showProfile(){
   document.getElementById('card').classList.add('in');
 }
 
+/* ============================================================
+   HIỆU ỨNG SAO THEO CON TRỎ (desktop)
+============================================================ */
 let lastStar = 0;
 document.addEventListener('mousemove', (e)=>{
   const now = Date.now();
@@ -1184,6 +1231,9 @@ document.addEventListener('mousemove', (e)=>{
   setTimeout(()=> star.remove(), 650);
 });
 
+/* ============================================================
+   INIT
+============================================================ */
 renderAvatar();
 renderTypedTitle();
 renderDiscord();
@@ -1192,7 +1242,6 @@ renderInfo();
 renderTechRow('techRow', CONFIG.techStack);
 renderIconRow('socialRow', CONFIG.socials);
 runBoot();
-initBackgroundVideo();
 initEffects();
 initAvatarDeco();
 initCopyProtection();
@@ -1201,11 +1250,14 @@ requestAnimationFrame(()=>{
   if(catEl) initCat(catEl);
 });
 
+/* ============================================================
+   TƯƠNG TÁC 3D: thẻ nghiêng nhẹ theo vị trí con trỏ / chạm
+============================================================ */
 (function initTilt(){
   const profileEl = document.getElementById('profile');
   const cardEl = document.getElementById('card');
-  const maxTilt = 18;
-  const ease = 0.10;
+  const maxTilt = 18; // độ nghiêng tối đa — tăng số này nếu thấy còn YẾU, giảm nếu thấy còn MẠNH
+  const ease = 0.10; // độ mượt: nhỏ hơn = mượt/chậm hơn
 
   let targetRotX = 0, targetRotY = 0, targetScale = 1;
   let curRotX = 0, curRotY = 0, curScale = 1;
@@ -1221,13 +1273,13 @@ requestAnimationFrame(()=>{
     if(settled){
       looping = false;
       cardEl.style.transform = 'translateY(0) scale(1) rotateX(0deg) rotateY(0deg)';
-      cardEl.classList.remove('tilting');
+      cardEl.classList.remove('tilting'); // về lại transition mượt .7s khi đã đứng yên
       return;
     }
     requestAnimationFrame(loop);
   }
   function ensureLoop(){
-    cardEl.classList.add('tilting');
+    cardEl.classList.add('tilting'); // bắt buộc phải bật class này, nếu không transform sẽ bị transition .7s "nuốt" mất và card trông như bị kẹt/nghiêng cứng
     if(!looping){ looping = true; requestAnimationFrame(loop); }
   }
 
@@ -1237,7 +1289,7 @@ requestAnimationFrame(()=>{
     const dy = (clientY - (rect.top + rect.height/2)) / (rect.height/2);
     targetRotY = Math.max(-1, Math.min(1, dx)) * maxTilt;
     targetRotX = Math.max(-1, Math.min(1, dy)) * -maxTilt;
-    targetScale = 1.015;
+    targetScale = 1.015; // độ phóng to khi rê chuột — tăng/giảm số này để chỉnh mạnh yếu
     ensureLoop();
   }
   function resetTarget(){
@@ -1257,6 +1309,7 @@ requestAnimationFrame(()=>{
   }, { passive:true });
   profileEl.addEventListener('touchend', resetTarget);
 })();
+
 </script>
 </body>
 </html>
