@@ -45,6 +45,28 @@
     user-select:none;
   }
 
+  .bg-video-wrap{
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    overflow:hidden;
+    background:#1e1f22;
+  }
+  .bg-video-wrap video{
+    position:absolute;
+    top:50%; left:50%;
+    min-width:100%; min-height:100%;
+    width:auto; height:auto;
+    transform:translate(-50%,-50%);
+    object-fit:cover;
+    filter:brightness(.55) saturate(1.1);
+  }
+  .bg-video-wrap::after{
+    content:"";
+    position:absolute; inset:0;
+    background:rgba(18,10,36,.35);
+  }
+
   /* ============================================================
      BOOT / TERMINAL SCREEN
   ============================================================ */
@@ -307,18 +329,22 @@
   .discord-avatar-wrap .discord-avatar{
     box-shadow:0 0 0 3px #1e1f22, 0 0 0 4px rgba(0,0,0,.55);
   }
-  .avatar-badge{
-    position:absolute;
-    width:15px; height:15px;
-    border-radius:50%;
-    overflow:hidden;
-    border:2px solid #1e1f22;
-    background:#1e1f22;
-    z-index:3;
+  .discord-user-info{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    min-width:0;
   }
-  .avatar-badge img{ width:100%; height:100%; object-fit:cover; }
-  .avatar-badge.b1{ right:-4px; bottom:-3px; }
-  .avatar-badge.b2{ right:-4px; top:-3px; }
+  .discord-badge-row{
+    display:flex;
+    gap:5px;
+  }
+  .discord-badge-row img{
+    width:16px; height:16px;
+    border-radius:50%;
+    object-fit:cover;
+    box-shadow:0 0 0 2px rgba(0,0,0,.4);
+  }
 
 
   .sparkle{
@@ -449,6 +475,8 @@
 </head>
 <body>
 
+<div class="bg-video-wrap" id="bgVideoWrap"></div>
+
 <!-- ============ BOOT SCREEN ============ -->
 <div id="boot">
   <div class="term-window">
@@ -497,10 +525,11 @@
         <div class="discord-avatar-wrap" id="discordAvatarWrap">
           <div class="avatar-deco" id="avatarDeco2"></div>
           <div class="discord-avatar" id="discordAvatarEl"></div>
-          <div class="avatar-badge b1" id="avatarBadge1"></div>
-          <div class="avatar-badge b2" id="avatarBadge2"></div>
         </div>
-        <div class="discord-name" id="discordNameEl"></div>
+        <div class="discord-user-info">
+          <div class="discord-name" id="discordNameEl"></div>
+          <div class="discord-badge-row" id="discordBadgeRow"></div>
+        </div>
       </div>
       <div class="discord-bio" id="discordBioEl"></div>
     </div>
@@ -550,6 +579,10 @@ const CONFIG = {
     "https://raw.githubusercontent.com/nhicode/ak/main/IMG_4175.png",
     "https://raw.githubusercontent.com/nhicode/ak/main/83d8a1eb09a8d64e59233eec5d4d5c2d.png"
   ],
+
+  // Video nền toàn trang (có tiếng — đóng vai trò nhạc nền, tự phát không tiếng rồi
+  // mở tiếng ngay khi người xem bấm/nhấn Enter ở màn hình boot).
+  backgroundVideoUrl: "https://raw.githubusercontent.com/nhicode/ak/main/o0fqgQDIDCXehCEOAEfCA1TkyFn72NDIp5yjzV.mp4",
 
   // 2 video này vừa dùng làm "hiệu ứng hồ sơ" (phủ toàn khung profile),
   // vừa dùng làm viền động quanh avatar 1 và avatar 2 — kết hợp lại thành 1 bộ hiệu ứng.
@@ -761,6 +794,7 @@ async function runBoot(){
     document.getElementById('boot').classList.add('hide');
     document.removeEventListener('keydown', onKey);
     document.getElementById('boot').removeEventListener('click', proceed);
+    unlockMedia();
     setTimeout(showProfile, 500);
   };
   const onKey = (e)=>{ if(e.key === 'Enter') proceed(); };
@@ -796,25 +830,53 @@ function renderAvatar(){
   });
 }
 
-// 2 badge nhỏ đính trên avatar 2 (kiểu trang trí góc avatar của Discord)
+// 2 icon nhỏ hiển thị cạnh tên Discord (đúng vị trí như ảnh mẫu)
 function renderAvatarBadges(){
   const urls = CONFIG.avatarBadges || [];
-  const b1 = document.getElementById('avatarBadge1');
-  const b2 = document.getElementById('avatarBadge2');
-  if(urls[0] && b1){ b1.innerHTML = `<img src="${urls[0]}" alt="badge">`; } else if(b1){ b1.remove(); }
-  if(urls[1] && b2){ b2.innerHTML = `<img src="${urls[1]}" alt="badge">`; } else if(b2){ b2.remove(); }
+  const row = document.getElementById('discordBadgeRow');
+  if(!row) return;
+  urls.forEach(url=>{
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = 'badge';
+    row.appendChild(img);
+  });
 }
 
-function buildEffectVideo(src){
+function buildEffectVideo(src, opts){
+  opts = opts || {};
   const v = document.createElement('video');
   v.src = src;
-  v.muted = true;
+  v.muted = opts.muted !== false;
   v.playsInline = true;
   v.loop = false;
   v.preload = 'auto';
   v.setAttribute('disablePictureInPicture', '');
   v.setAttribute('disableRemotePlayback', '');
   return v;
+}
+
+let mediaUnlocked = false;
+const videosNeedingSound = [];
+function unlockMedia(){
+  if(mediaUnlocked) return;
+  mediaUnlocked = true;
+  videosNeedingSound.forEach(v=>{
+    v.muted = false;
+    const p = v.play();
+    if(p && p.catch) p.catch(()=>{});
+  });
+}
+
+function initBackgroundVideo(){
+  const wrap = document.getElementById('bgVideoWrap');
+  if(!wrap || !CONFIG.backgroundVideoUrl) return;
+  const v = buildEffectVideo(CONFIG.backgroundVideoUrl, { muted:true });
+  v.loop = true;
+  wrap.appendChild(v);
+  videosNeedingSound.push(v);
+  const p = v.play();
+  if(p && p.catch) p.catch(()=>{});
 }
 
 // "Hiệu ứng hồ sơ" (phủ toàn khung) + "trang trí ảnh đại diện" (viền quanh avatar 1 & 2)
@@ -1244,6 +1306,7 @@ renderIconRow('socialRow', CONFIG.socials);
 runBoot();
 initEffects();
 initAvatarDeco();
+initBackgroundVideo();
 initCopyProtection();
 requestAnimationFrame(()=>{
   const catEl = document.getElementById('decoCat');
