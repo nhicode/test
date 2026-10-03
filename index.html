@@ -7,20 +7,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@magenta/music@1.23.1"></script>
 <style>
-/* --- GIAO DIỆN MỚI: NEON MUSIC STUDIO LITE (ĐÃ NÂNG CẤP ANIMATION) --- */
+/* --- GIAO DIỆN CHUNG --- */
 :root {
   --bg-main: #090a0f;
   --bg-card: rgba(17, 19, 31, 0.65);
   --glass-border: rgba(255, 255, 255, 0.08);
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  
-  /* Gradient âm nhạc */
-  --c-primary: #8b5cf6; /* Tím Violet */
-  --c-secondary: #ec4899; /* Hồng Pink */
-  --c-accent: #06b6d4; /* Xanh Cyan */
-  
-  /* Trạng thái */
+  --c-primary: #8b5cf6;
+  --c-secondary: #ec4899;
+  --c-accent: #06b6d4;
   --st-run: #a78bfa;
   --st-ok: #10b981;
   --st-err: #f43f5e;
@@ -29,7 +25,6 @@
 
 * { box-sizing: border-box; }
 
-/* Nền trang web với hiệu ứng ánh sáng gradient */
 body {
   margin: 0;
   color: var(--text-main);
@@ -43,7 +38,6 @@ body {
   background-attachment: fixed;
 }
 
-/* Tùy chỉnh thanh cuộn */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; transition: background 0.3s; }
@@ -51,7 +45,6 @@ body {
 
 main { max-width: 1060px; margin: 0 auto; padding: 50px 20px 80px; }
 
-/* Tiêu đề xịn xò */
 h1 {
   font-size: clamp(32px, 6vw, 56px);
   line-height: 1.1;
@@ -96,7 +89,6 @@ h2::before {
   border-radius: 4px;
 }
 
-/* Hiệu ứng Glassmorphism cho các khối */
 .card {
   background: var(--bg-card);
   backdrop-filter: blur(16px);
@@ -113,7 +105,6 @@ h2::before {
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Khu vực tải file (Dropzone) - Thêm hiệu ứng nhịp đập */
 @keyframes dropPulse {
   0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.3); }
   70% { box-shadow: 0 0 0 15px rgba(6, 182, 212, 0); }
@@ -141,21 +132,11 @@ h2::before {
   animation: dropPulse 1.5s infinite;
   outline: 0;
 }
-#drop svg {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-#drop:hover svg {
-  transform: scale(1.1) translateY(-5px);
-}
-#drop b {
-  display: block;
-  font-size: 20px;
-  margin-bottom: 8px;
-  color: var(--text-main);
-}
+#drop svg { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+#drop:hover svg { transform: scale(1.1) translateY(-5px); }
+#drop b { display: block; font-size: 20px; margin-bottom: 8px; color: var(--text-main); }
 #drop span { color: var(--text-muted); font-size: 13px; }
 
-/* Bố cục Flow */
 .flow {
   display: grid;
   grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
@@ -164,26 +145,16 @@ h2::before {
 }
 @media(max-width: 820px){ .flow { grid-template-columns: 1fr; } }
 
-/* Danh sách bước chạy */
 #steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 #steps li {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  padding: 16px;
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  background: rgba(0, 0, 0, 0.2);
+  display: flex; gap: 16px; align-items: center; padding: 16px;
+  border: 1px solid var(--glass-border); border-radius: 16px; background: rgba(0, 0, 0, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 #steps li:hover { transform: translateX(4px); background: rgba(255, 255, 255, 0.02); }
 #steps .dot {
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  flex: none;
-  box-shadow: 0 0 0 4px rgba(255,255,255,0.05);
-  transition: all 0.3s ease;
+  width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.2); flex: none;
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.05); transition: all 0.3s ease;
 }
 #steps b { display: block; font-weight: 600; font-size: 15px;}
 #steps small { color: var(--text-muted); font-size: 12px;}
@@ -201,15 +172,9 @@ h2::before {
   100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0); } 
 }
 
-/* Giao diện Console (Nhật ký) */
 #log {
-  height: 280px;
-  overflow: auto;
-  background: #050608;
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  padding: 16px;
-  font: 13px/1.7 "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+  height: 280px; overflow: auto; background: #050608; border: 1px solid var(--glass-border);
+  border-radius: 16px; padding: 16px; font: 13px/1.7 "Fira Code", ui-monospace, Menlo, Consolas, monospace;
 }
 #log div { display: flex; gap: 12px; margin-bottom: 4px; animation: slideUp 0.3s ease-out; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -219,199 +184,139 @@ h2::before {
 #log .err span { color: var(--st-err); }
 #log .wr span { color: var(--st-wr); }
 
-/* Lưới Input Form */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-top: 10px;
-}
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 10px; }
 label { display: flex; flex-direction: column; font-size: 13px; color: var(--text-muted); font-weight: 500;}
 
 input[type=text], input[type=number], select, textarea {
-  width: 100%;
-  margin-top: 6px;
-  background: rgba(0, 0, 0, 0.3);
-  color: var(--text-main);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  padding: 10px 14px;
-  font: inherit;
+  width: 100%; margin-top: 6px; background: rgba(0, 0, 0, 0.3); color: var(--text-main);
+  border: 1px solid var(--glass-border); border-radius: 12px; padding: 10px 14px; font: inherit;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 input:focus-visible, select:focus-visible, textarea:focus-visible {
-  outline: none;
-  border-color: var(--c-accent);
-  background: rgba(0,0,0,0.5);
-  box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15), 0 0 15px rgba(6, 182, 212, 0.1);
-  transform: translateY(-2px);
+  outline: none; border-color: var(--c-accent); background: rgba(0,0,0,0.5);
+  box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15), 0 0 15px rgba(6, 182, 212, 0.1); transform: translateY(-2px);
 }
 input[type=checkbox] { accent-color: var(--c-accent); width: 16px; height: 16px; cursor: pointer;}
 label:has(input[type=checkbox]) { flex-direction: row; align-items: center; gap: 8px; color: var(--text-main); margin-bottom: 4px; cursor: pointer; transition: color 0.2s; }
 label:has(input[type=checkbox]):hover { color: var(--c-accent); }
 
-/* Nút bấm (Buttons) - Tối ưu click và hover */
 .btn {
-  background: linear-gradient(135deg, var(--c-primary), var(--c-secondary));
-  color: white;
-  border: 0;
-  border-radius: 12px;
-  padding: 12px 20px;
-  font: 600 14px inherit;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  position: relative;
-  overflow: hidden;
+  background: linear-gradient(135deg, var(--c-primary), var(--c-secondary)); color: white;
+  border: 0; border-radius: 12px; padding: 12px 20px; font: 600 14px inherit; cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: inline-flex; align-items: center;
+  justify-content: center; gap: 8px; position: relative; overflow: hidden;
 }
 .btn::after {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(rgba(255,255,255,0.2), transparent);
+  content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(255,255,255,0.2), transparent);
   opacity: 0; transition: opacity 0.3s;
 }
-.btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(236, 72, 153, 0.4);
-}
+.btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(236, 72, 153, 0.4); }
 .btn:hover::after { opacity: 1; }
-.btn:active { 
-  transform: scale(0.95) translateY(2px); 
-  box-shadow: 0 5px 10px rgba(236, 72, 153, 0.3); 
-  transition: all 0.1s;
-}
-.btn.sec {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-main);
-  border: 1px solid var(--glass-border);
-}
-.btn.sec:hover {
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-  border-color: rgba(255,255,255,0.2);
-}
+.btn:active { transform: scale(0.95) translateY(2px); box-shadow: 0 5px 10px rgba(236, 72, 153, 0.3); transition: all 0.1s; }
+.btn.sec { background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--glass-border); }
+.btn.sec:hover { background: rgba(255, 255, 255, 0.1); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); border-color: rgba(255,255,255,0.2); }
 
 .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 16px; }
 
-/* Nút Accordion (Details/Summary) */
 summary {
-  cursor: pointer;
-  color: var(--c-accent);
-  font-weight: 600;
-  margin-bottom: 12px;
-  outline: none;
-  list-style: none;
-  display: inline-flex;
-  align-items: center;
-  transition: color 0.2s;
+  cursor: pointer; color: var(--c-accent); font-weight: 600; margin-bottom: 12px; outline: none;
+  list-style: none; display: inline-flex; align-items: center; transition: color 0.2s;
 }
 summary:hover { text-shadow: 0 0 10px rgba(6, 182, 212, 0.4); }
 summary::-webkit-details-marker { display: none; }
-summary::before {
-  content: '▸';
-  margin-right: 8px;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+summary::before { content: '▸'; margin-right: 8px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 details[open] summary::before { transform: rotate(90deg); }
 
-/* --- GIAO DIỆN BÀN PHÍM CHUẨN SKY: CHILDREN OF THE LIGHT --- */
+/* --- GIAO DIỆN BÀN PHÍM CHUẨN XÁC 100% NHƯ ẢNH GỐC --- */
 #keys {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 12px;
-  max-width: 440px;
+  max-width: 420px;
   margin: 20px auto 24px;
-  background: rgba(0, 0, 0, 0.25); /* Nền mờ phía sau cụm nhạc cụ */
-  padding: 30px 20px;
-  border-radius: 24px;
+  padding: 24px;
+  background: rgba(18, 30, 48, 0.4);
+  border-radius: 16px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
 }
 
 .key {
   position: relative;
   aspect-ratio: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  background: #253e5e; /* Màu xanh Navy đậm như ảnh */
+  border-radius: 14px; /* Bo góc mượt mà */
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 700;
-  font-size: 16px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index: 1;
-  border: none;
-  background: transparent;
-  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15), inset 0 2px 4px rgba(255,255,255,0.03);
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Tạo hình thoi (Diamond) chuẩn Sky bằng pseudo-element */
-.key::before {
+/* Ẩn hoàn toàn chữ cái và số để giống ảnh 100% */
+.key span { display: none; }
+
+/* Các Pseudo-elements để vẽ Họa tiết bên trong */
+.key::before, .key::after {
   content: '';
   position: absolute;
   top: 50%; left: 50%;
-  width: 75%; height: 75%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px; /* Bo góc hình thoi đặc trưng của Sky */
+  box-sizing: border-box;
+  border: 1.5px solid rgba(255, 255, 255, 0.95); /* Viền mảnh sắc nét */
+  transition: all 0.15s ease;
+}
+
+/* 1. Họa tiết Hình tròn (Circle) */
+.key.circle::before {
+  width: 50%; height: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 2. Họa tiết Hình thoi (Diamond) */
+.key.diamond::before {
+  width: 44%; height: 44%;
   transform: translate(-50%, -50%) rotate(45deg);
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index: -1;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-.key small { 
-  font-size: 11px; 
-  font-weight: 500; 
-  opacity: 0.6; 
-  margin-top: 2px; 
-  transition: all 0.2s; 
+/* 3. Họa tiết Combo (Hình thoi bao quanh Hình tròn) */
+.key.combo::before {
+  width: 50%; height: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.key.combo::after {
+  width: 33%; height: 33%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
 }
 
-/* Hiệu ứng di chuột (Hover) */
-.key:hover {
-  color: #fff;
-}
-.key:hover::before {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-  transform: translate(-50%, -50%) rotate(45deg) scale(1.05);
+/* Tương tác khi di chuột (Hover) */
+.key:hover { background: #325178; }
+.key:hover::before, .key:hover::after {
+  border-color: #fff;
+  box-shadow: 0 0 10px rgba(255,255,255,0.3);
 }
 
-/* Hiệu ứng BẤM (Hit) - Tỏa sáng rực rỡ như trong game */
+/* Hiệu ứng Phát Sáng khi bấm (Hit) */
 .key.hit {
-  color: #000;
-  text-shadow: none;
-  transform: scale(0.95); /* Toàn bộ nút lún nhẹ */
+  transform: scale(0.9);
+  background: #fdf0cc; /* Phát sáng trắng pha chút vàng */
+  box-shadow: 0 0 20px rgba(253, 240, 204, 0.5);
 }
-.key.hit small { 
-  color: rgba(0, 0, 0, 0.7); 
-  opacity: 1; 
+.key.hit::before, .key.hit::after {
+  border-color: #1b3052; /* Viền chuyển thành màu tối để nổi bật trên nền sáng */
+  box-shadow: none;
 }
-.key.hit::before {
-  background: #fdf0cc; /* Màu trắng ngà / vàng nhạt sáng rực */
-  border-color: #fef08a;
-  transform: translate(-50%, -50%) rotate(45deg) scale(0.85); /* Hình thoi lõm xuống */
-  box-shadow: 0 0 20px #fef08a, 0 0 40px rgba(253, 224, 71, 0.7), inset 0 0 10px rgba(255,255,255,0.8);
-}
+/* ---------------------------------------------------- */
 
 #stats { color: var(--text-muted); font-size: 13px; text-align: center; margin-top: 16px; font-weight: 500;}
 #rollbox {
-  overflow-x: auto;
-  margin-top: 16px;
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  background: #050608;
-  box-shadow: inset 0 4px 20px rgba(0,0,0,0.5);
+  overflow-x: auto; margin-top: 16px; border: 1px solid var(--glass-border); border-radius: 12px;
+  background: #050608; box-shadow: inset 0 4px 20px rgba(0,0,0,0.5);
 }
 #roll { display: block; }
 #rep { font-size: 14px; line-height: 1.7; margin-top: 16px; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px;}
@@ -507,7 +412,6 @@ const keyMidi=i=>60+12*Math.floor(i/7)+SC[i%7];
 const CKPT='https://storage.googleapis.com/magentadata/js/checkpoints/transcription/onsets_frames_uni';
 let tracks=[],tempos=[],division=480,song=null,fileName='bai-nhac',ctx=null,timers=[],model=null,midiBytes=null,T0=performance.now(),busy=0;
 
-/* ---------- Nhật ký + các bước ---------- */
 function log(msg,cls=''){
   const L=$('#log'),s=(performance.now()-T0)/1000,d=document.createElement('div');
   d.className=cls;
@@ -517,14 +421,26 @@ function log(msg,cls=''){
 function step(i,st,txt){const e=$('#s'+i);e.dataset.st=st;if(txt!=null)e.querySelector('small').textContent=txt}
 const frame=()=>new Promise(r=>setTimeout(r,30));
 
-/* ---------- Bàn phím 15 nút + nghe thử ---------- */
+/* --- KHỞI TẠO BÀN PHÍM VỚI HỌA TIẾT CHÍNH XÁC --- */
 const keysEl=$('#keys');
-for(let i=0;i<15;i++){
-  const b=document.createElement('div');b.className='key';b.id='k'+i;
-  b.innerHTML=NAMES[i%7]+'<small>'+i+'</small>';
+// Mảng họa tiết sắp xếp đúng chuẩn hình ảnh cung cấp (trái sang phải, trên xuống dưới)
+const shapes = [
+  'combo', 'diamond', 'circle', 'diamond', 'circle', /* Hàng 1 */
+  'circle', 'diamond', 'combo', 'diamond', 'circle', /* Hàng 2 */
+  'circle', 'diamond', 'circle', 'diamond', 'combo'  /* Hàng 3 */
+];
+
+for(let i=0; i<15; i++){
+  const b=document.createElement('div');
+  b.className='key ' + shapes[i]; // Gắn class họa tiết tương ứng
+  b.id='k'+i;
+  // Bọc text trong span (đã ẩn bằng CSS) để code dễ bảo trì
+  b.innerHTML='<span>' + NAMES[i%7] + '<small>' + i + '</small></span>';
   b.addEventListener('pointerdown',()=>{tone(i,0);flash(i,160)});
   keysEl.appendChild(b);
 }
+/* ------------------------------------------------ */
+
 function flash(i,ms){const e=$('#k'+i);e.classList.add('hit');setTimeout(()=>e.classList.remove('hit'),ms)}
 function tone(i,delay){
   ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();
@@ -547,7 +463,6 @@ $('#bPlay').onclick=()=>{
   for(const e of ev){const d=e.t-t0;tone(e.i,.1+d/1000);timers.push(setTimeout(()=>flash(e.i,140),100+d))}
 };
 
-/* ---------- Đọc MIDI ---------- */
 function parseMidi(buf){
   const d=new DataView(buf);let p=0;
   const str=n=>{let s='';for(let i=0;i<n;i++)s+=String.fromCharCode(d.getUint8(p++));return s};
@@ -590,7 +505,6 @@ function t2ms(tick){
   return ms+(tick-lt)*us/1000/division;
 }
 
-/* ---------- Quy đổi sang Sky ---------- */
 const foldOct=m=>{let k=0;while(m<60){m+=12;k++}while(m>84){m-=12;k++}return{m,k}};
 const keyIdx=m=>Math.floor((m-60)/12)*7+SC.indexOf(m%12);
 function mapPitch(m0,prev,mode){
@@ -608,7 +522,6 @@ async function convert(){
   step(1,'run','Đang quy đổi…');log('Bắt đầu quy đổi '+all.length+' nốt sang 15 phím Sky');
   await frame();if(run!==busy)return;
   try{
-  /* 1) Dịch tông + quãng tám */
   const hist=new Array(128).fill(0);all.forEach(n=>hist[n.n]++);
   const shSel=$('#tr').value,ocSel=$('#oct').value,rng=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
   let bc=Infinity,sh=0,oc=0;
@@ -626,12 +539,10 @@ async function convert(){
   let prev=null;
   for(const p of pts){const r=mapPitch(p.m,prev,mode);p.key=r.i;p.acc=r.acc;p.fold=r.k;prev=r.i}
 
-  /* 2) Gom nốt cùng lúc (15ms) */
   const on=[];
   for(const p of pts){const o=on[on.length-1];if(o&&p.t-o.t<=15)o.list.push(p);else on.push({t:p.t,list:[p]})}
   log('Gom thành '+on.length+' thời điểm đánh');
 
-  /* 3) Dò BPM */
   log('Đang dò BPM của game…');await frame();if(run!==busy)return;
   const manual=+$('#bpmfix').value,dec=$('#dec').checked,sus=+$('#sus').value;
   const tolIn=parseFloat($('#tol').value),tolMs=Math.max(.01,isNaN(tolIn)?0:tolIn);
@@ -661,7 +572,6 @@ async function convert(){
   const bpm=g.bpm,Lg=60000/bpm;
   log('BPM game = '+bpm+' (1 ô = '+Lg.toFixed(2)+' ms), lệch tối đa '+g.mx.toFixed(2)+' ms','ok');
 
-  /* 4) Xếp ô */
   const START=4,errs=[],cellKeys=new Map();
   let last=-1e9,c0=null,pushed=0,cLast=0;
   for(const o of on){
@@ -694,7 +604,6 @@ async function convert(){
     [...cellKeys.get(c)].sort((a,b)=>a-b).forEach(k=>notes.push({time:t,key:'1Key'+k}));
   }
 
-  /* 5) Báo cáo */
   let exact=0,acc=0,fold=0,drop=0;
   for(const o of on)for(const p of o.list){
     if(!o.kept.has(p.key)){drop++;continue}
@@ -724,7 +633,6 @@ async function convert(){
   }catch(e){step(1,'err','Lỗi');log('Lỗi quy đổi: '+(e.message||e),'err')}
 }
 
-/* ---------- Piano roll ---------- */
 function drawRoll(){
   const cv=$('#roll'),n=song.songNotes;if(!n.length){cv.width=1;return}
   const Lg=60000/(song.bpm||120),cs=n.map(x=>({c:Math.floor(x.time/Lg),k:+x.key.replace(/^\dKey/,'')}));
@@ -733,7 +641,7 @@ function drawRoll(){
   cv.width=cols*W;cv.height=15*H;
   const x=cv.getContext('2d');x.fillStyle='#050608';x.fillRect(0,0,cv.width,cv.height);
   x.fillStyle='#1e293b';for(let c=0;c<cols;c+=4)x.fillRect(c*W,0,1,cv.height);
-  x.fillStyle='#06b6d4'; /* Đổi màu nốt trên roll thành xanh Cyan */
+  x.fillStyle='#06b6d4';
   for(const a of cs){const c=a.c-c0;if(c<cols)x.fillRect(c*W+1,(14-a.k)*H+1,W-2,H-2)}
 }
 function render(){
@@ -748,7 +656,6 @@ function render(){
 }
 function toJSON(){const o={...song};delete o._info;delete o._rep;return JSON.stringify([o])}
 
-/* ---------- Xuất file ---------- */
 function download(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
 const safe=()=>(($('#name').value||fileName).replace(/[\\/:*?"<>|]+/g,'_'));
 $('#bTxt').onclick=()=>{
@@ -765,7 +672,6 @@ $('#bMid').onclick=async()=>{
   download(fileName+'.mid',new Blob([midiBytes],{type:'application/octet-stream'}));log('Đã tải '+fileName+'.mid','ok');
 };
 
-/* ---------- Nhập file ---------- */
 for(let t=-11;t<=11;t++){const o=document.createElement('option');o.value=t;o.textContent=(t>0?'+':'')+t;$('#tr').appendChild(o)}
 const drop=$('#drop'),fi=$('#file');
 drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fi.click()}};
@@ -810,7 +716,7 @@ async function load(f){
       log('Nhận dạng xong: '+ns.notes.length+' nốt, dài '+ns.totalTime.toFixed(1)+' giây','ok');
       step(0,'ok',ns.notes.length+' nốt');
       tracks=[{name:'Piano nhận dạng từ '+f.name,notes:ns.notes.map(n=>({tick:(n.startTime||0)*1000,n:n.pitch,end:n.endTime*1000}))}];
-      tempos=[{tick:0,us:1000000}];division=1000;      // 1 tick = 1 ms
+      tempos=[{tick:0,us:1000000}];division=1000;
       $('#tol').value=35;$('#name').value=fileName;
       log('Tự điền sai số 35 ms vì thời gian nốt nhận dạng từ âm thanh không tròn nhịp');
       showTracks();await convert();
