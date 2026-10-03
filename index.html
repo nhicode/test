@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@magenta/music@1.23.1"></script>
 <style>
-/* --- GIAO DIỆN MỚI: NEON MUSIC STUDIO LITE --- */
+/* --- GIAO DIỆN MỚI: NEON MUSIC STUDIO LITE (ĐÃ NÂNG CẤP ANIMATION) --- */
 :root {
   --bg-main: #090a0f;
   --bg-card: rgba(17, 19, 31, 0.65);
@@ -46,7 +46,7 @@ body {
 /* Tùy chỉnh thanh cuộn */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; transition: background 0.3s; }
 ::-webkit-scrollbar-thumb:hover { background: var(--c-primary); }
 
 main { max-width: 1060px; margin: 0 auto; padding: 50px 20px 80px; }
@@ -62,11 +62,15 @@ h1 {
 }
 h1 i {
   font-style: normal;
-  background: linear-gradient(135deg, var(--c-accent), var(--c-primary));
+  background: linear-gradient(135deg, var(--c-accent), var(--c-primary), var(--c-secondary));
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
+  animation: shine 4s linear infinite;
 }
+@keyframes shine { to { background-position: 200% center; } }
+
 .sub {
   color: var(--text-muted);
   max-width: 65ch;
@@ -101,12 +105,21 @@ h2::before {
   border-radius: 24px;
   padding: 24px;
   margin-bottom: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s ease, box-shadow 0.3s ease;
 }
-.card:hover { border-color: rgba(255,255,255,0.15); }
+.card:hover { 
+  border-color: rgba(255,255,255,0.15); 
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
 
-/* Khu vực tải file (Dropzone) */
+/* Khu vực tải file (Dropzone) - Thêm hiệu ứng nhịp đập */
+@keyframes dropPulse {
+  0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.3); }
+  70% { box-shadow: 0 0 0 15px rgba(6, 182, 212, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+}
+
 #drop {
   display: flex;
   flex-direction: column;
@@ -118,15 +131,21 @@ h2::before {
   text-align: center;
   cursor: pointer;
   background: rgba(0, 0, 0, 0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   margin-bottom: 24px;
 }
 #drop:hover, #drop.on, #drop:focus-visible {
   border-color: var(--c-accent);
-  background: rgba(6, 182, 212, 0.05);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15);
+  background: rgba(6, 182, 212, 0.08);
+  transform: translateY(-4px);
+  animation: dropPulse 1.5s infinite;
   outline: 0;
+}
+#drop svg {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#drop:hover svg {
+  transform: scale(1.1) translateY(-5px);
 }
 #drop b {
   display: block;
@@ -155,26 +174,32 @@ h2::before {
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   background: rgba(0, 0, 0, 0.2);
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+#steps li:hover { transform: translateX(4px); background: rgba(255, 255, 255, 0.02); }
 #steps .dot {
   width: 12px; height: 12px;
   border-radius: 50%;
   background: rgba(255,255,255,0.2);
   flex: none;
   box-shadow: 0 0 0 4px rgba(255,255,255,0.05);
+  transition: all 0.3s ease;
 }
 #steps b { display: block; font-weight: 600; font-size: 15px;}
 #steps small { color: var(--text-muted); font-size: 12px;}
 
-#steps li[data-st=run] { border-color: var(--st-run); background: rgba(167, 139, 250, 0.05); }
-#steps li[data-st=run] .dot { background: var(--st-run); box-shadow: 0 0 15px var(--st-run); animation: pulse 1.5s infinite; }
+#steps li[data-st=run] { border-color: var(--st-run); background: rgba(167, 139, 250, 0.05); transform: scale(1.02); }
+#steps li[data-st=run] .dot { background: var(--st-run); animation: pulseDot 1.5s infinite; }
 #steps li[data-st=ok] { border-color: rgba(16, 185, 129, 0.3); }
-#steps li[data-st=ok] .dot { background: var(--st-ok); }
+#steps li[data-st=ok] .dot { background: var(--st-ok); box-shadow: 0 0 10px rgba(16, 185, 129, 0.5), 0 0 0 4px rgba(16, 185, 129, 0.1); }
 #steps li[data-st=err] { border-color: rgba(244, 63, 94, 0.3); }
 #steps li[data-st=err] .dot { background: var(--st-err); }
 
-@keyframes pulse { 0% {opacity: 1; transform: scale(1);} 50% {opacity: 0.4; transform: scale(0.8);} 100% {opacity: 1; transform: scale(1);} }
+@keyframes pulseDot { 
+  0% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.6); } 
+  70% { box-shadow: 0 0 0 10px rgba(167, 139, 250, 0); } 
+  100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0); } 
+}
 
 /* Giao diện Console (Nhật ký) */
 #log {
@@ -186,10 +211,11 @@ h2::before {
   padding: 16px;
   font: 13px/1.7 "Fira Code", ui-monospace, Menlo, Consolas, monospace;
 }
-#log div { display: flex; gap: 12px; margin-bottom: 4px;}
+#log div { display: flex; gap: 12px; margin-bottom: 4px; animation: slideUp 0.3s ease-out; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 #log time { color: #475569; flex: none; user-select: none; }
 #log span { overflow-wrap: anywhere; color: #cbd5e1; }
-#log .ok span { color: var(--st-ok); }
+#log .ok span { color: var(--st-ok); text-shadow: 0 0 8px rgba(16, 185, 129, 0.3); }
 #log .err span { color: var(--st-err); }
 #log .wr span { color: var(--st-wr); }
 
@@ -211,18 +237,20 @@ input[type=text], input[type=number], select, textarea {
   border-radius: 12px;
   padding: 10px 14px;
   font: inherit;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: none;
   border-color: var(--c-accent);
   background: rgba(0,0,0,0.5);
-  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+  box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15), 0 0 15px rgba(6, 182, 212, 0.1);
+  transform: translateY(-2px);
 }
 input[type=checkbox] { accent-color: var(--c-accent); width: 16px; height: 16px; cursor: pointer;}
-label:has(input[type=checkbox]) { flex-direction: row; align-items: center; gap: 8px; color: var(--text-main); margin-bottom: 4px; cursor: pointer;}
+label:has(input[type=checkbox]) { flex-direction: row; align-items: center; gap: 8px; color: var(--text-main); margin-bottom: 4px; cursor: pointer; transition: color 0.2s; }
+label:has(input[type=checkbox]):hover { color: var(--c-accent); }
 
-/* Nút bấm (Buttons) */
+/* Nút bấm (Buttons) - Tối ưu click và hover */
 .btn {
   background: linear-gradient(135deg, var(--c-primary), var(--c-secondary));
   color: white;
@@ -231,17 +259,29 @@ label:has(input[type=checkbox]) { flex-direction: row; align-items: center; gap:
   padding: 12px 20px;
   font: 600 14px inherit;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.btn::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(rgba(255,255,255,0.2), transparent);
+  opacity: 0; transition: opacity 0.3s;
 }
 .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(236, 72, 153, 0.4);
 }
-.btn:active { transform: translateY(0); }
+.btn:hover::after { opacity: 1; }
+.btn:active { 
+  transform: scale(0.95) translateY(2px); 
+  box-shadow: 0 5px 10px rgba(236, 72, 153, 0.3); 
+  transition: all 0.1s;
+}
 .btn.sec {
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-main);
@@ -249,8 +289,10 @@ label:has(input[type=checkbox]) { flex-direction: row; align-items: center; gap:
 }
 .btn.sec:hover {
   background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255,255,255,0.2);
 }
+
 .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 16px; }
 
 /* Nút Accordion (Details/Summary) */
@@ -263,16 +305,18 @@ summary {
   list-style: none;
   display: inline-flex;
   align-items: center;
+  transition: color 0.2s;
 }
+summary:hover { text-shadow: 0 0 10px rgba(6, 182, 212, 0.4); }
 summary::-webkit-details-marker { display: none; }
 summary::before {
   content: '▸';
   margin-right: 8px;
-  transition: transform 0.2s;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 details[open] summary::before { transform: rotate(90deg); }
 
-/* Bàn phím 15 nút - Phong cách Neon Pad */
+/* Bàn phím 15 nút - ANIMATION MỚI CHÂN THỰC HƠN */
 #keys {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -281,6 +325,8 @@ details[open] summary::before { transform: rotate(90deg); }
   margin: 10px auto 24px;
 }
 .key {
+  position: relative;
+  overflow: hidden;
   aspect-ratio: 1;
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,0.05);
@@ -294,20 +340,46 @@ details[open] summary::before { transform: rotate(90deg); }
   justify-content: center;
   cursor: pointer;
   user-select: none;
-  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Hiệu ứng bật nảy khi nhả phím */
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   -webkit-tap-highlight-color: transparent;
-  box-shadow: inset 0 2px 0 rgba(255,255,255,0.05), 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 1;
 }
-.key small { font-size: 11px; font-weight: 500; opacity: 0.6; margin-top: 2px; }
-.key:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+
+/* Ánh sáng nền mờ mờ bên trong phím */
+.key::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.2) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.key small { font-size: 11px; font-weight: 500; opacity: 0.6; margin-top: 2px; transition: color 0.2s, opacity 0.2s; }
+
+.key:hover { 
+  background: rgba(255,255,255,0.08); 
+  color: var(--text-main); 
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 8px 20px rgba(0,0,0,0.5);
+}
+.key:hover::before { opacity: 1; }
+
+/* Trạng thái BẤM - Hiệu ứng lún sâu và tỏa sáng rực rỡ */
 .key.hit {
   background: var(--c-accent);
   color: #000;
   border-color: var(--c-accent);
-  box-shadow: 0 0 20px var(--c-accent), inset 0 0 10px rgba(255,255,255,0.5);
-  transform: scale(1.08) translateY(-2px);
+  /* Lún xuống sâu hơn và thu nhỏ lại */
+  transform: scale(0.92) translateY(4px);
+  /* Ánh sáng neon tỏa ra ngoài và đổ bóng thụt vào trong */
+  box-shadow: 0 0 25px var(--c-accent), 0 0 50px rgba(6, 182, 212, 0.5), inset 0 4px 10px rgba(0,0,0,0.4);
+  /* Chuyển động rất nhanh khi bấm xuống */
+  transition: all 0.05s ease-out;
 }
-.key.hit small { color: rgba(0,0,0,0.7); opacity: 1; }
+.key.hit small { color: rgba(0,0,0,0.8); opacity: 1; }
 
 #stats { color: var(--text-muted); font-size: 13px; text-align: center; margin-top: 16px; font-weight: 500;}
 #rollbox {
@@ -316,6 +388,7 @@ details[open] summary::before { transform: rotate(90deg); }
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   background: #050608;
+  box-shadow: inset 0 4px 20px rgba(0,0,0,0.5);
 }
 #roll { display: block; }
 #rep { font-size: 14px; line-height: 1.7; margin-top: 16px; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px;}
