@@ -316,70 +316,93 @@ summary::before {
 }
 details[open] summary::before { transform: rotate(90deg); }
 
-/* Bàn phím 15 nút - ANIMATION MỚI CHÂN THỰC HƠN */
+/* --- GIAO DIỆN BÀN PHÍM CHUẨN SKY: CHILDREN OF THE LIGHT --- */
 #keys {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 14px;
-  max-width: 480px;
-  margin: 10px auto 24px;
+  gap: 12px;
+  max-width: 440px;
+  margin: 20px auto 24px;
+  background: rgba(0, 0, 0, 0.25); /* Nền mờ phía sau cụm nhạc cụ */
+  padding: 30px 20px;
+  border-radius: 24px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
 }
+
 .key {
   position: relative;
-  overflow: hidden;
   aspect-ratio: 1;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.05);
-  background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.5));
-  color: var(--text-muted);
-  font-weight: 700;
-  font-size: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   user-select: none;
-  /* Hiệu ứng bật nảy khi nhả phím */
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   -webkit-tap-highlight-color: transparent;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 10px rgba(0,0,0,0.3);
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+  font-size: 16px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 1;
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
 
-/* Ánh sáng nền mờ mờ bên trong phím */
+/* Tạo hình thoi (Diamond) chuẩn Sky bằng pseudo-element */
 .key::before {
   content: '';
-  position: absolute; inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.2) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 75%; height: 75%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px; /* Bo góc hình thoi đặc trưng của Sky */
+  transform: translate(-50%, -50%) rotate(45deg);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: -1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-.key small { font-size: 11px; font-weight: 500; opacity: 0.6; margin-top: 2px; transition: color 0.2s, opacity 0.2s; }
-
-.key:hover { 
-  background: rgba(255,255,255,0.08); 
-  color: var(--text-main); 
-  transform: translateY(-2px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 8px 20px rgba(0,0,0,0.5);
+.key small { 
+  font-size: 11px; 
+  font-weight: 500; 
+  opacity: 0.6; 
+  margin-top: 2px; 
+  transition: all 0.2s; 
 }
-.key:hover::before { opacity: 1; }
 
-/* Trạng thái BẤM - Hiệu ứng lún sâu và tỏa sáng rực rỡ */
+/* Hiệu ứng di chuột (Hover) */
+.key:hover {
+  color: #fff;
+}
+.key:hover::before {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.05);
+}
+
+/* Hiệu ứng BẤM (Hit) - Tỏa sáng rực rỡ như trong game */
 .key.hit {
-  background: var(--c-accent);
   color: #000;
-  border-color: var(--c-accent);
-  /* Lún xuống sâu hơn và thu nhỏ lại */
-  transform: scale(0.92) translateY(4px);
-  /* Ánh sáng neon tỏa ra ngoài và đổ bóng thụt vào trong */
-  box-shadow: 0 0 25px var(--c-accent), 0 0 50px rgba(6, 182, 212, 0.5), inset 0 4px 10px rgba(0,0,0,0.4);
-  /* Chuyển động rất nhanh khi bấm xuống */
-  transition: all 0.05s ease-out;
+  text-shadow: none;
+  transform: scale(0.95); /* Toàn bộ nút lún nhẹ */
 }
-.key.hit small { color: rgba(0,0,0,0.8); opacity: 1; }
+.key.hit small { 
+  color: rgba(0, 0, 0, 0.7); 
+  opacity: 1; 
+}
+.key.hit::before {
+  background: #fdf0cc; /* Màu trắng ngà / vàng nhạt sáng rực */
+  border-color: #fef08a;
+  transform: translate(-50%, -50%) rotate(45deg) scale(0.85); /* Hình thoi lõm xuống */
+  box-shadow: 0 0 20px #fef08a, 0 0 40px rgba(253, 224, 71, 0.7), inset 0 0 10px rgba(255,255,255,0.8);
+}
 
 #stats { color: var(--text-muted); font-size: 13px; text-align: center; margin-top: 16px; font-weight: 500;}
 #rollbox {
@@ -477,7 +500,6 @@ textarea { height: 130px; font-family: "Fira Code", monospace; font-size: 12px; 
 </div>
 </main>
 
-<!-- GIỮ NGUYÊN 100% SCRIPT CŨ -->
 <script>
 const $=s=>document.querySelector(s);
 const SC=[0,2,4,5,7,9,11],NAMES=['C','D','E','F','G','A','B'];
